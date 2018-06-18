@@ -12,8 +12,8 @@ io.on('connection', (socket) => {
       console.log("user diconnected");
    });
    socket.on('new user', (username) => {
-      console.log(username);
-      io.emit('new connection', username);
+      console.log(username + "logged on");
+      socket.broadcast.emit('new connection', username);
    })
 });
 

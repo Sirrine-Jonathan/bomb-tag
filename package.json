@@ -5,5 +5,21 @@
   "dependencies": {
     "express": "^4.15.2",
     "socket.io": "^2.1.1"
-  }
+  },
+  "main": "index.js",
+  "devDependencies": {},
+  "scripts": {
+	"start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sirrine-Jonathan/bomb-tag.git"
+  },
+  "author": "Jonathan Sirrine",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Sirrine-Jonathan/bomb-tag/issues"
+  },
+  "homepage": "https://github.com/Sirrine-Jonathan/bomb-tag#readme"
 }

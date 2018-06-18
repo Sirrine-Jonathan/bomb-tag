@@ -14,15 +14,20 @@
           if (e.charCode == 13){
             let username = uInput.value;
             uInput.style.display = 'none';
+            addUser(username);
             socket.emit('new user', username);
           }
         });
-	   socket.on('new connection', (u) => {
-		 let uo = document.querySelector('#usersOnline');
-		 let li = document.createElement('li');
-		 li.innerHTML = u.toString();
-		 uo.appendChild(li);
+	   socket.on('new connection', (username) => {
+        addUser(username);
 	   });
+
+     function addUser(username){
+       let uo = document.querySelector('#usersOnline');
+       let li = document.createElement('li');
+       li.innerHTML = username.toString();
+       uo.appendChild(li);
+     }
       }
     </script>
   </head>
