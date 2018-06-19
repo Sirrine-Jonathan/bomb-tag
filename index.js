@@ -1,36 +1,35 @@
-/*
-   Users online array needs to be in this file
-   push the arreay to index.html when a user connects
-   validate the unique constraint of username in index.html
-   update user online list in index.html when a new user enters.
-*/
-
-let app = require('express')();
+const express = require('express');
+const app = express();
 let http = require('http').Server(app);
 let io = require('socket.io')(http);
 const port = (process.env.PORT) ? process.env.PORT:8888;
 let users = {};
+const SERVER_COLOR = "#FFFFFF";
 
-app.get('/', function(req, res){
-   res.sendFile(__dirname + '/index.html');
-});
-
+app.use(express.static('public'));
 io.on('connection', (socket) => {
    io.emit('updateusers', users);
 
-
    socket.on('new user', (user) => {
       socket.userinfo = user;
-      users[socket.userinfo.username] = socket.userinfo;
-      socket.emit('updatechat', 'SERVER', 'you have connected');
-      socket.broadcast.emit('updatechat', 'SERVER', user.username + ' has connected');
+      users[socket.userinfo.name] = socket.userinfo;
+      socket.emit('updatechat', 'SERVER', SERVER_COLOR, 'you have connected');
+      socket.broadcast.emit('updatechat', 'SERVER', SERVER_COLOR, socket.userinfo.name + ' has connected');
       io.sockets.emit('updateusers', users); 
-   })
+   });
+
+   socket.on('sendchat', (msg) => {
+      let name = (socket.userinfo) ? socket.userinfo.name:"anon";
+      let color = (socket.userinfo) ? socket.userinfo.color:"#FFFFFF";
+      io.sockets.emit('updatechat', name, color, msg);
+   });
 
    socket.on('disconnect', () => {
-      delete users[socket.userinfo.username];
-      io.sockets.emit('updateusers', users);
-      socket.broadcast.emit('updatechat', 'SERVER', socket.userinfo.username + ' has disconnected');
+      if (socket.userinfo){
+         delete users[socket.userinfo.name];
+         io.sockets.emit('updateusers', users);
+         socket.broadcast.emit('updatechat', 'SERVER', SERVER_COLOR, socket.userinfo.name + ' has disconnected');
+      }
    });
 });
 

@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Bomb Tag</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="gamestyle.css">
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="client.js"></script>
+  </head>
+  <body>
+  <div class="container">
+  
+    <div id="header">
+      <span id="title">Bomb Tag  </span><br />
+      <input id="usernameInput" type="text" placeholder="username"/>
+      <span id="usernameError" class="error"></span>
+    </div>
+    <div id="playarea">
+    </div>
+
+    <div class="container" id="sidebar">
+      <ul id="usersOnline">
+      </ul>
+      <div id="chat">
+      </div>
+      <input id="chatInput" type="text" placeholder="say something"/>
+    </div>
+  
+  </div>
+  </body>
+</html>

@@ -1,0 +1,53 @@
+#usernameError {
+   color: red;
+}
+
+#title {
+   font-size: 2em;
+}
+
+#header {
+   height: 75px;
+   padding: 20px;
+}
+
+#sidebar {
+   height:100%;
+   width:260px;
+   position: fixed;
+   z-index: 1;
+   top: 0;
+   left: 0;
+   padding-top: 20px;
+   background-color: black;
+   color: white;
+}
+
+#usersOnline {
+    list-style: none; /* Remove list bullets */
+    padding: 0;
+    margin: 0;
+    height:100px;
+    overflow-y: auto;
+}
+
+#usersOnline li:before {
+    content: "•";
+    padding-right: 8px;
+    color: #71ff71;
+}
+
+#chat {
+   height: 700px;
+   width: 100%;
+   margin:0;
+   padding:2px;
+   border:1px inset white;
+   overflow-y: auto;
+   word-break: break-all;
+   word-wrap: break-word;
+}
+
+#chatInput {
+   width: 100%;
+}
