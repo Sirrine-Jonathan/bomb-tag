@@ -7,35 +7,80 @@
     </style>
     <script src="/socket.io/socket.io.js"></script>
     <script>
-      window.onload = function(){
+      var usersOnline = [];
+      var clientID = '';
+      window.onload = function(){  
         var socket = io();
+
+
+        /*
+          add username to players
+        */
         let uInput = document.querySelector("#usernameInput");
         uInput.addEventListener('keypress', (e) => {
           if (e.charCode == 13){
             let username = uInput.value;
+
+            // validate unique name constraint
+            let unique = true;
+            for (let i = 0; i < usersOnline.length; i++){
+              if (usersOnline[i].name == username){
+                unique = false;
+                break;
+              }
+            };
+            if (!unique){
+              let errorMsg = document.querySelector('#usernameError');
+              errorMsg.innerHTML = "username taken";
+              return;
+            }
+            else {
+              let errorMsg = document.querySelector('#usernameError');
+              errorMsg.innerHTML = '';
+            }
+
+            let user = {
+              'id': socket.id,
+              'name': username,
+              'it': false
+            }
+
             uInput.style.display = 'none';
-            addUser(username);
-            socket.emit('new user', username);
+            socket.emit('new user', user);
           }
         });
-	   socket.on('new connection', (username) => {
-        addUser(username);
-	   });
 
-     function addUser(username){
-       let uo = document.querySelector('#usersOnline');
-       let li = document.createElement('li');
-       li.innerHTML = username.toString();
-       uo.appendChild(li);
-     }
+        /*
+          user has joined or left
+        */
+        socket.on('update users', (users) => {
+          usersOnline = users;
+          console.log(usersOnline);
+          updateUsers();
+        });
+
+
+        /*
+          updates the UI
+        */
+        function updateUsers(){
+          let uo = document.querySelector('#usersOnline');
+          uo.innerHTML = 'Players';
+          usersOnline.forEach((each) => {
+            let li = document.createElement('li');
+            li.innerHTML = each.name + ((each.it) ? "<span style='color: red'> <!></span>":"");
+            uo.appendChild(li);
+          });
+        }
       }
     </script>
   </head>
   <body>
-    <ul id="usersOnline">
-	User's Online
+  <ul id="usersOnline">
+	  Players
 	</ul>
-    <input id="usernameInput" type="text" placeholder="username"/>
+    <input id="usernameInput" type="text" placeholder="username"/><br />
+    <span id="usernameError" class="error"></span><br />
     <div id="playarea">
     </div>
   </body>

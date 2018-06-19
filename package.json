@@ -10,7 +10,8 @@
   "devDependencies": {},
   "scripts": {
 	 "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "publish": "git add . && git commit -m \"publishing\" && git push heroku master",
+    "test": "nodemon index.js"
   },
   "repository": {
     "type": "git",
