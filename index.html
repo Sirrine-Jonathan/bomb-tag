@@ -7,7 +7,7 @@
     </style>
     <script src="/socket.io/socket.io.js"></script>
     <script>
-      var usersOnline = [];
+      var usersOnline = {};
       var clientID = '';
       window.onload = function(){  
         var socket = io();
@@ -22,6 +22,7 @@
             let username = uInput.value;
 
             // validate unique name constraint
+            /*
             let unique = true;
             for (let i = 0; i < usersOnline.length; i++){
               if (usersOnline[i].name == username){
@@ -38,6 +39,7 @@
               let errorMsg = document.querySelector('#usernameError');
               errorMsg.innerHTML = '';
             }
+            */
 
             let user = {
               'id': socket.id,
@@ -53,7 +55,7 @@
         /*
           user has joined or left
         */
-        socket.on('update users', (users) => {
+        socket.on('updateusers', (users) => {
           usersOnline = users;
           console.log(usersOnline);
           updateUsers();
@@ -66,11 +68,11 @@
         function updateUsers(){
           let uo = document.querySelector('#usersOnline');
           uo.innerHTML = 'Players';
-          usersOnline.forEach((each) => {
+          for (user in usersOnline){
             let li = document.createElement('li');
-            li.innerHTML = each.name + ((each.it) ? "<span style='color: red'> <!></span>":"");
+            li.innerHTML = usersOnline[user].name + ((usersOnline[user].it) ? "<span style='color: red'> <!></span>":"");
             uo.appendChild(li);
-          });
+          };
         }
       }
     </script>
