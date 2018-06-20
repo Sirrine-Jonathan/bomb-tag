@@ -4,12 +4,13 @@
   "description": "a socket.io game",
   "dependencies": {
     "express": "^4.15.2",
+    "npm": "^6.1.0",
     "socket.io": "^2.1.1"
   },
   "main": "index.js",
   "devDependencies": {},
   "scripts": {
-	 "start": "node index.js",
+    "start": "node index.js",
     "publish": "git add . && git commit -m \"publishing\" && git push heroku master",
     "test": "nodemon index.js"
   },

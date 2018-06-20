@@ -8,24 +8,29 @@
     <script src="client.js"></script>
   </head>
   <body>
-  <div class="container">
-  
-    <div id="header">
-      <span id="title">Bomb Tag  </span><br />
-      <input id="usernameInput" type="text" placeholder="username"/>
-      <span id="usernameError" class="error"></span>
-    </div>
-    <div id="playarea">
-    </div>
+  <div class="container-fluid main-container">
+    <div class="row content-row">
 
-    <div class="container" id="sidebar">
-      <ul id="usersOnline">
-      </ul>
-      <div id="chat">
+      <div class="col-md-3" id="sidebar">
+        <ul id="usersOnline">
+        </ul>
+        <div id="chat">
+        </div>
+        <input id="chatInput" type="text" placeholder="say something"/>
       </div>
-      <input id="chatInput" type="text" placeholder="say something"/>
+
+      <div class="page-body col-md-8 col-lg-9">
+        <div id="header">
+          <span id="title">Bomb Tag  </span><br />
+          <input id="usernameInput" type="text" placeholder="username"/>
+          <span id="usernameError" class="error"></span>
+        </div>
+        <div id="playarea">
+        </div>
+      </div>
+
+
     </div>
-  
   </div>
   </body>
 </html>
