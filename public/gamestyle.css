@@ -43,14 +43,19 @@ body, html { height: 100%; }
 #usersOnline {
     list-style: none; /* Remove list bullets */
     padding: 0;
-    margin: 0;
-    height:100px;
+    margin-bottom: 10px;
+    height:150px;
     overflow-y: auto;
+}
+
+#usersOnline li {
+   margin: 3px;
+   min-width: 20%;
 }
 
 #usersOnline li:before {
     content: "•";
-    padding-right: 8px;
+    padding-right: 16px;
     color: #71ff71;
 }
 

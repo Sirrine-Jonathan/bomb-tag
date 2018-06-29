@@ -13,7 +13,6 @@ window.onload = function(){
       let username = uInput.value;
 
       // validate unique name constraint
-      
       let unique = true;
       for (let user in usersOnline){
         if (usersOnline[user].name == username){
@@ -108,6 +107,7 @@ window.onload = function(){
     uo.innerHTML = '';
     for (user in usersOnline){
       let li = document.createElement('li');
+	    li.style.borderRight = "50px solid " + usersOnline[user].color;
       li.innerHTML = usersOnline[user].name + ((usersOnline[user].it) ? "<span style='color: red'> <!></span>":"");
       uo.appendChild(li);
     };
