@@ -1,13 +1,14 @@
 let usersOnline = {};
-let numOfUsers = 0;
 let userName = null; // get from some sort of storage eventually
-
+const itSymbol = "  [IT]";
+const itHTML = "<span style='color:red'>" + itSymbol + "</span>";
 window.onload = function(){  
   let socket = io();
 
 
   /*
-    add username to players
+    User Enters Game
+    by choosing a username
   */
   let uInput = document.querySelector("#usernameInput");
   uInput.addEventListener('keypress', (e) => {
@@ -26,8 +27,7 @@ window.onload = function(){
         let errorMsg = document.querySelector('#usernameError');
         errorMsg.innerHTML = "username taken";
         return;
-      }
-      else {
+      } else {
         let errorMsg = document.querySelector('#usernameError');
         errorMsg.innerHTML = '';
       }
@@ -41,18 +41,24 @@ window.onload = function(){
         return color;
       }
 
-      let user = {
-        'id': socket.id,
-        'name': username,
-        'it': false,
-        'color': getRandomColor()
-      };
+      function User(id, username){
+          this.id = id;
+          this.name = username;
+          this.it = false;
+          this.color = getRandomColor();
+          this.pos = {
+              'x': 0,
+              'y': 0
+          }
+          this.speed = 2;
+      }
+
+      let user = new User(socket.id, username);
+      document.querySelector("#playarea").style.borderColor = user.color;
 
       // empty head
       let head = document.getElementById('header');
       let errorMsg = document.querySelector('#usernameError');
-      //head.removeChild(uInput);
-      //head.removeChild(errorMsg);
       uInput.style.display = "none";
       errorMsg.style.display = "none";
 
@@ -65,6 +71,11 @@ window.onload = function(){
 
       // update other users
       socket.emit('new user', user);
+
+      // send player movement to server
+      setInterval(function() {
+          socket.emit('movement', movement);
+      }, 1000 / 60);
     }
   });
 
@@ -115,27 +126,74 @@ window.onload = function(){
   });
 
   /*
+    updates the UI
+  */
+    function updateUsers(){
+        let uo = document.querySelector('#usersOnline');
+        uo.innerHTML = '';
+        for (user in usersOnline){
+            let li = document.createElement('li');
+            li.style.borderRight = "50px solid " + usersOnline[user].color;
+            li.innerHTML = usersOnline[user].name;
+            if (usersOnline[user].it)
+                li.innerHTML += itHTML;
+            uo.appendChild(li);
+        }
+    }
+
+  /*
     client has been tagged
   */
   socket.on('tagged', () => {
       console.log("You are it!");
       let uDisplay = document.querySelector("#uDisplay");
-      uDisplay.innerHTML = userName + "<span style='color:red'> [!]</span>";
+      uDisplay.innerHTML = userName + itHTML;
   });
 
   /*
-    updates the UI
+    SEND THE USERS MOVEMENT TO THE SERVER
+    user controls the player with arrow keys
   */
-  function updateUsers(){
-    let uo = document.querySelector('#usersOnline');
-    uo.innerHTML = '';
-    for (user in usersOnline){
-      let li = document.createElement('li');
-      li.style.borderRight = "50px solid " + usersOnline[user].color;
-      li.innerHTML = usersOnline[user].name;
-      if (usersOnline[user].it)
-          li.innerHTML += "<span style='color:red'> [!]</span>";
-      uo.appendChild(li);
-    }
-  }
+  let movement = {   up: false,  down: false,
+                   left: false, right: false   };
+    document.addEventListener('keydown', (e) => {
+      console.log(e.key);
+      if (e.key === "ArrowRight" || e.key === "d")
+          movement.right = true;
+      else if (e.key === "ArrowLeft" || e.key === "a")
+          movement.left = true;
+      else if (e.key === "ArrowUp" || e.key === "w")
+          movement.up = true;
+      else if (e.key === "ArrowDown" || e.key === "s")
+          movement.down = true;
+    });
+    document.addEventListener('keyup', (e) => {
+        console.log(e.key);
+        if (e.key === "ArrowRight" || e.key === "d")
+            movement.right = false;
+        else if (e.key === "ArrowLeft" || e.key === "a")
+            movement.left = false;
+        else if (e.key === "ArrowUp" || e.key === "w")
+            movement.up = false;
+        else if (e.key === "ArrowDown" || e.key === "s")
+            movement.down = false;
+    });
+
+    let canvas = document.querySelector("#playarea");
+    let ctx = canvas.getContext('2d');
+    socket.on('state', (users) => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (let u in users){
+            let user = users[u];
+            ctx.beginPath();
+            ctx.arc(user.pos.x, user.pos.y, 5, 0, Math.PI*2);
+            ctx.strokeStyle = user.color;
+            ctx.stroke();
+            ctx.closePath();
+        }
+    })
+
 };
+
+
+

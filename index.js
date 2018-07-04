@@ -75,7 +75,26 @@ io.on('connection', (socket) => {
          socket.broadcast.emit('updatechat', 'SERVER', SERVER_COLOR, socket.userinfo.name + ' has disconnected');
       }
    });
+
+
+   socket.on('movement', (data) => {
+       let player = (socket.userinfo) ? users[socket.userinfo.name]:false || {};
+       if (data.left)
+           player.pos.x -= player.speed;
+       if (data.up)
+           player.pos.y -= player.speed;
+       if (data.right)
+           player.pos.x += player.speed;
+       if (data.down)
+           player.pos.y += player.speed;
+   });
+
+   setInterval(() => {
+       io.sockets.emit('state', users);
+   }, 1000 / 60);
 });
+
+
 
 http.listen(port, () => {
    console.log('listening on :' + port);
