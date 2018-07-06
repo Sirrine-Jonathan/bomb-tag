@@ -23,6 +23,7 @@ io.on('connection', (socket) => {
          someoneIt = true;
       }
       user.pos = initPos(user.canvas);
+      user.startPos = user.pos;
       socket.userinfo = user;
       users[socket.userinfo.name] = socket.userinfo;
       socket.emit('updatechat', 'SERVER', SERVER_COLOR, 'you have connected');
@@ -123,6 +124,7 @@ io.on('connection', (socket) => {
             let tagString = player.name + " tagging: ";
             collidingWith.forEach((chump) => {
                 tagString += " " + chump.name + " ";
+                chump.pos = chump.startPos;
             })
             console.log(tagString);
         }

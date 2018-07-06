@@ -9,10 +9,11 @@ class User {
 		this.size = 10;
 		this.pos = {'x': canvas.width / 2,
 					'y': canvas.height /2 };
+		this.startPos = this.pos;
 		this.canvas = {
 			"width": canvas.width,
 			"height": canvas.height
-		}
+		};
 		this.tagging = false;
 	}
 
