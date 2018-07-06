@@ -13,6 +13,6 @@ window.onload = function() {
             }
             loopHandle = window.requestAnimationFrame(draw);
         }, 1000 / frameRate);
-    };
+    }
     //draw();
 };

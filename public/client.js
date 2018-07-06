@@ -13,8 +13,10 @@ window.onload = function(){
   let uInput = document.querySelector("#usernameInput");
   uInput.addEventListener('keypress', (e) => {
     if (e.key === "Enter"){
+
       let username = uInput.value;
       userName = username;
+
       // validate unique name constraint
       let unique = true;
       for (let user in usersOnline){
@@ -31,30 +33,10 @@ window.onload = function(){
         let errorMsg = document.querySelector('#usernameError');
         errorMsg.innerHTML = '';
       }
-      
-      function getRandomColor() {
-        let letters = '0123456789ABCDEF';
-        let color = '#';
-        for (let i = 0; i < 6; i++) {
-          color += letters[Math.floor(Math.random() * 16)];
-        }
-        return color;
-      }
 
-      function User(id, username){
-          this.id = id;
-          this.name = username;
-          this.it = false;
-          this.color = getRandomColor();
-          this.pos = {
-              'x': 0,
-              'y': 0
-          }
-          this.speed = 2;
-      }
-
-      let user = new User(socket.id, username);
-      document.querySelector("#playarea").style.borderColor = user.color;
+      let canvas = document.querySelector('#playarea');
+      let user = new User(socket.id, username, canvas);
+      socket.userinfo = user;
 
       // empty head
       let head = document.getElementById('header');
@@ -67,14 +49,50 @@ window.onload = function(){
       uDisplay.id = "uDisplay";
       uDisplay.style.color = user.color;
       uDisplay.innerHTML = user.name;
+
+      let chooseColor = document.createElement('input');
+      chooseColor.type = "color";
+      chooseColor.value = user.color;
+      chooseColor.style.marginLeft = "15px";
+      chooseColor.style.border = "none";
+      chooseColor.style.cursor = "pointer";
+
+      chooseColor.addEventListener("input", () => {
+         let color = chooseColor.value;
+         if(validateColor(color)) {
+             uDisplay.style.color = color;
+             usersOnline[socket.userinfo.name].color = color;
+             let data = {
+                 'name': socket.userinfo.name,
+                 'color': color
+             };
+             socket.emit('userchanged', data);
+         } else {
+             chooseColor.value = user.color;
+         }
+      });
+
+      function validateColor(color){
+          return true;
+      }
+
       head.appendChild(uDisplay);
+      head.appendChild(chooseColor);
 
       // update other users
       socket.emit('new user', user);
 
       // send player movement to server
+
       setInterval(function() {
-          socket.emit('movement', movement);
+          let data = {
+              'movement': movement,
+              'limits': {
+                  'right': canvas.width,
+                  'bottom': canvas.height
+              }
+          };
+          socket.emit('movement', data);
       }, 1000 / 60);
     }
   });
@@ -95,8 +113,12 @@ window.onload = function(){
     update chat
   */
   socket.on('updatechat', (username, color, msg) => {
-    let newChat = document.createElement('span');
-    newChat.innerHTML = "<b style='color:" + color + "'>" + username + ":</b> " + msg + '<br />';
+    let newChat = document.createElement('div');
+    newChat.dataset.toggle = "tooltip";
+    newChat.dataset.placement = "right";
+    newChat.title = new Date().toLocaleString();
+    let content = "<b style='color:" + color + "'>" + username + ":</b> " + msg + '<br />';
+    newChat.innerHTML = content;
     let chat = document.querySelector('#chat');
     chat.appendChild(newChat);
   });
@@ -141,11 +163,19 @@ window.onload = function(){
         }
     }
 
+    let btn = document.querySelector("#closeSidebar");
+    btn.addEventListener("click", () => {
+        let sidebar = document.querySelector("#sidebar");
+        if (sidebar.style.display == "none")
+            sidebar.style.display = "block";
+        else
+            sidebar.style.display = "none";
+    });
+
   /*
     client has been tagged
   */
   socket.on('tagged', () => {
-      console.log("You are it!");
       let uDisplay = document.querySelector("#uDisplay");
       uDisplay.innerHTML = userName + itHTML;
   });
@@ -157,39 +187,48 @@ window.onload = function(){
   let movement = {   up: false,  down: false,
                    left: false, right: false   };
     document.addEventListener('keydown', (e) => {
-      console.log(e.key);
-      if (e.key === "ArrowRight" || e.key === "d")
+      if (/* e.key === "ArrowRight" || */ e.key === "d")
           movement.right = true;
-      else if (e.key === "ArrowLeft" || e.key === "a")
+      else if (/* e.key === "ArrowLeft" || */ e.key === "a")
           movement.left = true;
-      else if (e.key === "ArrowUp" || e.key === "w")
+      else if (/* e.key === "ArrowUp" || */ e.key === "w")
           movement.up = true;
-      else if (e.key === "ArrowDown" || e.key === "s")
+      else if (/* e.key === "ArrowDown" || */ e.key === "s")
           movement.down = true;
     });
     document.addEventListener('keyup', (e) => {
-        console.log(e.key);
-        if (e.key === "ArrowRight" || e.key === "d")
+        if (/*e.key === "ArrowRight" || */e.key === "d")
             movement.right = false;
-        else if (e.key === "ArrowLeft" || e.key === "a")
+        else if (/*e.key === "ArrowLeft" || */e.key === "a")
             movement.left = false;
-        else if (e.key === "ArrowUp" || e.key === "w")
+        else if (/*e.key === "ArrowUp" || */e.key === "w")
             movement.up = false;
-        else if (e.key === "ArrowDown" || e.key === "s")
+        else if (/*e.key === "ArrowDown" || */e.key === "s")
             movement.down = false;
     });
 
+
+    /*
+
+        game mechanics
+        -draw functions
+        -socket state handling
+     */
     let canvas = document.querySelector("#playarea");
     let ctx = canvas.getContext('2d');
+
+    function draw(user) {
+        ctx.beginPath();
+        ctx.arc(user.pos.x, user.pos.y, user.size, 0, Math.PI * 2);
+        ctx.fillStyle = user.color;
+        ctx.fill();
+        ctx.closePath();
+    }
+
     socket.on('state', (users) => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         for (let u in users){
-            let user = users[u];
-            ctx.beginPath();
-            ctx.arc(user.pos.x, user.pos.y, 5, 0, Math.PI*2);
-            ctx.strokeStyle = user.color;
-            ctx.stroke();
-            ctx.closePath();
+            draw(users[u]);
         }
     })
 

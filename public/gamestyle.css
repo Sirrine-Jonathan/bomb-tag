@@ -2,12 +2,14 @@ body, html { height: 100%; }
 
 #main-container {
    width: 100%;
+    max-width: none;
 }
-
+/*
 .content-row {
    display: flex;
    flex-wrap: wrap;
 }
+*/
 
 #usernameError {
    color: red;
@@ -19,25 +21,33 @@ body, html { height: 100%; }
 
 #header {
    padding: 1.5%;
+   background-color: thistle;
+}
+
+.wrapper {
+    display: flex;
+    width: 100%;
+    padding:0;
+    wrapper:0;
+    align-items: stretch;
 }
 
 #sidebar {
-   position: fixed;
-   top: 0;
-   bottom: 0;
-   left: 0;
-   z-index: 100;
-   padding-top: 20px;
-   background-color: black;
-   color: white;
+    /*
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    */
+    width: 300px;
+    padding-top: 20px;
+    background-color: black;
+    color: white;
 }
 
 .page-body {
-   position: absolute;
-   top: 0;
-   right: 0;
-   bottom: 0;
-
+    width: 100%;
 }
 
 #usersOnline {
@@ -64,19 +74,27 @@ body, html { height: 100%; }
    width: 100%;
    margin:0;
    padding:2px;
-   border:1px inset white;
    overflow-y: auto;
    word-break: break-all;
    word-wrap: break-word;
 }
 
 #chatInput {
-   width: 100%;
+    width: 100%;
+    padding:3px;
+}
+
+#closeSidebar {
+    cursor: pointer;
+}
+
+#playareaContainer {
+    overflow-x: scroll;
+    overflow-y: scroll;
 }
 
 #playarea {
-    //display: table;
-    border: 1px solid white;
-    //height: 80%;
-    //width: 100%;
+    width: 200%;
+    height: 200%;
+    border: 1px solid black;
 }

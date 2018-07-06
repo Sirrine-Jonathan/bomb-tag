@@ -2,17 +2,31 @@
 <html>
   <head>
     <title>Bomb Tag</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <!--
+    Bootstrap's JavaScript requires jQuery
+
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+          integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    -->
+
     <link rel="stylesheet" type="text/css" href="gamestyle.css">
     <script src="/socket.io/socket.io.js"></script>
+    <script src="User.js"></script>
     <script src="client.js"></script>
-    <!--<script src="game.js"></script>-->
   </head>
   <body>
-  <div class="container-fluid main-container">
-    <div class="row content-row">
+  <div class="main-container">
+    <div class="wrapper">
 
-      <div class="col-md-3" id="sidebar">
+      <!-- SIDEBAR -->
+      <div id="sidebar">
         <ul id="usersOnline">
         </ul>
         <div id="chat">
@@ -20,18 +34,23 @@
         <input id="chatInput" type="text" placeholder="say something"/>
       </div>
 
-      <div class="page-body col-md-8 col-lg-9">
+      <!-- BODY -->
+      <div class="page-body">
+
         <div id="header">
-          <span id="title">Bomb Tag  </span><br />
+          <span id="title">Bomb Tag  </span><span id="closeSidebar" class="btn btn-small">Toggle Info</span><br />
           <input id="usernameInput" type="text" placeholder="username"/>
           <span id="usernameError" class="error"></span>
         </div>
-        <canvas id="playarea" width="1200" height="750">
-        </canvas>
+        <div id="playareaContainer">
+          <canvas id="playarea" width="1366" height="662">
+          </canvas>
+        </div>
       </div>
 
 
-    </div>
-  </div>
-  </body>
+    </div><!-- end wrapper   -->
+  </div><!--   end container -->
+
+</body>
 </html>

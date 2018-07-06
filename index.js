@@ -6,6 +6,7 @@ const port = (process.env.PORT) ? process.env.PORT:8888;
 let users = {};
 let numOfUsers = 0;
 let someoneIt = false;
+let personIt = null;
 const SERVER_COLOR = "#FFFFFF";
 
 app.use(express.static('public'));
@@ -14,15 +15,16 @@ io.on('connection', (socket) => {
 
    socket.on('new user', (user) => {
       numOfUsers++;
-      console.log("numOfUsers: " + numOfUsers);
       if (numOfUsers === 2 && someoneIt === false){
          user.it = true;
          io.to(user.id).emit('tagged');
+         personIt = user.name;
          someoneIt = true;
       }
       socket.userinfo = user;
       users[socket.userinfo.name] = socket.userinfo;
       socket.emit('updatechat', 'SERVER', SERVER_COLOR, 'you have connected');
+      socket.emit("updatechat", "SERVER", SERVER_COLOR, '...use awsd to move')
       socket.broadcast.emit('updatechat', 'SERVER', SERVER_COLOR, socket.userinfo.name + ' has connected');
       io.sockets.emit('updateusers', users); 
    });
@@ -42,21 +44,15 @@ io.on('connection', (socket) => {
          if (users[socket.userinfo.name] && users[socket.userinfo.name].it) {
              delete users[socket.userinfo.name];
              numOfUsers--;
-             console.log("numOfUsers: " + numOfUsers);
              someoneIt = false;
              if (numOfUsers > 1) {
-                 // make someone else be it.
-                 for (let i = 0; i < 10; i++){
-                     console.log("test rand: " + Math.floor(Math.random() * numOfUsers));
-                 }
                  let randomNum = Math.floor(Math.random() * numOfUsers);
-                 console.log("random Number: " + randomNum);
                  let i = 0;
                  for (user in users) {
-                     if (i == randomNum) {
+                     if (i === randomNum) {
                          users[user].it = true;
                          io.to(users[user].id).emit('tagged');
-                         console.log(users[user].name + " is it: " + users[user].it);
+                         personIt = users[user].name;
                          someoneIt = true;
                      }
                      i++;
@@ -65,7 +61,6 @@ io.on('connection', (socket) => {
          } else {
              delete users[socket.userinfo.name];
              numOfUsers--;
-             console.log("numOfUsers: " + numOfUsers);
          }
 
          // update clients
@@ -76,21 +71,63 @@ io.on('connection', (socket) => {
       }
    });
 
+   socket.on('userchanged', (data) => {
+       users[data.name].color = data.color;
+       io.sockets.emit('updateusers', users);
+   });
+
 
    socket.on('movement', (data) => {
-       let player = (socket.userinfo) ? users[socket.userinfo.name]:false || {};
-       if (data.left)
+       let movement = data.movement;
+       let limits = data.limits;
+       let player = (socket.userinfo) ? users[socket.userinfo.name]:{};
+       if (movement.left && player.pos.x > player.size) {
            player.pos.x -= player.speed;
-       if (data.up)
+       }
+       if (movement.up && player.pos.y > player.size) {
            player.pos.y -= player.speed;
-       if (data.right)
+       }
+       if (movement.right && player.pos.x < (limits.right - player.size)) {
            player.pos.x += player.speed;
-       if (data.down)
+       }
+       if (movement.down && player.pos.y < (limits.bottom - player.size)) {
            player.pos.y += player.speed;
+       }
    });
+
+   function checkCollision(player){
+       let collidingWith = [];
+        for (u in users){
+            if (player == users[u])
+                continue;
+            // aliases
+            let px = player.pos.x;
+            let py = player.pos.y;
+            let pb = player.size;
+            let ux = users[u].pos.x;
+            let uy = users[u].pos.y;
+            let ub = users[u].size;
+            let buff = pb + ub;
+
+            // check vertical alignment
+            let vert = Math.abs(py - uy) < buff;
+            let horz = Math.abs(px - ux) < buff;
+            if (vert && horz)
+                collidingWith.push(users[u]);
+        }
+        if (collidingWith.length > 0){
+            console.log(player.name + " tagging: ");
+            collidingWith.forEach((chump) => {
+                console.log("..." + chump.name);
+            })
+        }
+        return collidingWith;
+   }
 
    setInterval(() => {
        io.sockets.emit('state', users);
+       if (someoneIt)
+           checkCollision(users[personIt]);
    }, 1000 / 60);
 });
 
