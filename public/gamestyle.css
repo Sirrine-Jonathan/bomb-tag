@@ -94,7 +94,5 @@ body, html { height: 100%; }
 }
 
 #playarea {
-    width: 200%;
-    height: 200%;
     border: 1px solid black;
 }

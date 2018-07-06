@@ -7,6 +7,7 @@ let users = {};
 let numOfUsers = 0;
 let someoneIt = false;
 let personIt = null;
+let cornerCount = 0;
 const SERVER_COLOR = "#FFFFFF";
 
 app.use(express.static('public'));
@@ -21,6 +22,7 @@ io.on('connection', (socket) => {
          personIt = user.name;
          someoneIt = true;
       }
+      user.pos = initPos(user.canvas);
       socket.userinfo = user;
       users[socket.userinfo.name] = socket.userinfo;
       socket.emit('updatechat', 'SERVER', SERVER_COLOR, 'you have connected');
@@ -81,24 +83,26 @@ io.on('connection', (socket) => {
        let movement = data.movement;
        let limits = data.limits;
        let player = (socket.userinfo) ? users[socket.userinfo.name]:{};
-       if (movement.left && player.pos.x > player.size) {
-           player.pos.x -= player.speed;
-       }
-       if (movement.up && player.pos.y > player.size) {
-           player.pos.y -= player.speed;
-       }
-       if (movement.right && player.pos.x < (limits.right - player.size)) {
-           player.pos.x += player.speed;
-       }
-       if (movement.down && player.pos.y < (limits.bottom - player.size)) {
-           player.pos.y += player.speed;
+       if (player !== {} && player.pos && !isNaN(player.pos.x) && !isNaN(player.pos.y)) {
+           if (movement.left && player.pos.x > player.size) {
+               player.pos.x -= player.speed;
+           }
+           if (movement.up && player.pos.y > player.size) {
+               player.pos.y -= player.speed;
+           }
+           if (movement.right && player.pos.x < (limits.right - player.size)) {
+               player.pos.x += player.speed;
+           }
+           if (movement.down && player.pos.y < (limits.bottom - player.size)) {
+               player.pos.y += player.speed;
+           }
        }
    });
 
    function checkCollision(player){
        let collidingWith = [];
         for (u in users){
-            if (player == users[u])
+            if (player === users[u])
                 continue;
             // aliases
             let px = player.pos.x;
@@ -116,13 +120,55 @@ io.on('connection', (socket) => {
                 collidingWith.push(users[u]);
         }
         if (collidingWith.length > 0){
-            console.log(player.name + " tagging: ");
+            let tagString = player.name + " tagging: ";
             collidingWith.forEach((chump) => {
-                console.log("..." + chump.name);
+                tagString += " " + chump.name + " ";
             })
+            console.log(tagString);
         }
         return collidingWith;
    }
+
+    function initPos(canvas) {
+        let corner = cornerCount % 4;
+        cornerCount++;
+        console.log("Corner: " + corner);
+        let pos = {};
+        switch(corner) {
+            case 0:
+                pos = {
+                    'x': 0,
+                    'y': 0
+                };
+                break;
+            case 1:
+                pos = {
+                    'x': canvas.width,
+                    'y': 0
+                };
+                break;
+
+            case 2:
+                pos = {
+                    'x': canvas.width,
+                    'y': canvas.height
+                };
+                break;
+
+            case 3:
+                pos = {
+                    'x': 0,
+                    'y': canvas.height
+                };
+                break;
+            default:
+                pos = {
+                    'x': canvas.width / 2,
+                    'y': canvas.height / 2
+                };
+        }
+        return pos;
+    }
 
    setInterval(() => {
        io.sockets.emit('state', users);

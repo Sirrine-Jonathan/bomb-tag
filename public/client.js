@@ -187,23 +187,23 @@ window.onload = function(){
   let movement = {   up: false,  down: false,
                    left: false, right: false   };
     document.addEventListener('keydown', (e) => {
-      if (/* e.key === "ArrowRight" || */ e.key === "d")
+      if (e.key === "ArrowRight" || e.key === "d")
           movement.right = true;
-      else if (/* e.key === "ArrowLeft" || */ e.key === "a")
+      else if (e.key === "ArrowLeft" || e.key === "a")
           movement.left = true;
-      else if (/* e.key === "ArrowUp" || */ e.key === "w")
+      else if (e.key === "ArrowUp" || e.key === "w")
           movement.up = true;
-      else if (/* e.key === "ArrowDown" || */ e.key === "s")
+      else if (e.key === "ArrowDown" || e.key === "s")
           movement.down = true;
     });
     document.addEventListener('keyup', (e) => {
-        if (/*e.key === "ArrowRight" || */e.key === "d")
+        if (e.key === "ArrowRight" || e.key === "d")
             movement.right = false;
-        else if (/*e.key === "ArrowLeft" || */e.key === "a")
+        else if (e.key === "ArrowLeft" || e.key === "a")
             movement.left = false;
-        else if (/*e.key === "ArrowUp" || */e.key === "w")
+        else if (e.key === "ArrowUp" || e.key === "w")
             movement.up = false;
-        else if (/*e.key === "ArrowDown" || */e.key === "s")
+        else if (e.key === "ArrowDown" || e.key === "s")
             movement.down = false;
     });
 
