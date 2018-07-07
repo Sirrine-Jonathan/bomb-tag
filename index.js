@@ -73,8 +73,7 @@ io.on('connection', (socket) => {
        users[data.name].color = data.color;
        io.sockets.emit('updateusers', users);
    });
-
-
+   //Player Movement
    socket.on('movement', (data) => {
        let movement = data.movement;
        let limits = data.limits;
