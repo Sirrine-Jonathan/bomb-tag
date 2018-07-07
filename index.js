@@ -2,12 +2,12 @@ const express = require('express');
 const app = express();
 let http = require('http').Server(app);
 let io = require('socket.io')(http);
+const User = require('./User.js');
 const port = (process.env.PORT) ? process.env.PORT:8888;
 let users = {};
 let numOfUsers = 0;
 let someoneIt = false;
 let personIt = null;
-let cornerCount = 0;
 const SERVER_COLOR = "#FFFFFF";
 
 app.use(express.static('public'));
@@ -15,21 +15,19 @@ io.on('connection', (socket) => {
    io.emit('updateusers', users);
 
    socket.on('new user', (user) => {
+      let newUser = new User(user.id, user.name, user.canvas, user.color);
+      socket.emit('updatechat', 'SERVER', SERVER_COLOR, 'you have connected');
+      socket.broadcast.emit('updatechat', 'SERVER', SERVER_COLOR, newUser.name + ' has connected');
+
       numOfUsers++;
       if (numOfUsers === 2 && someoneIt === false){
-         user.it = true;
-         io.to(user.id).emit('tagged');
-         personIt = user.name;
-         someoneIt = true;
+        playerTagged(newUser);
       }
-      user.pos = initPos(user.canvas);
-      user.startPos = user.pos;
-      socket.userinfo = user;
+
+      socket.userinfo = newUser;
       users[socket.userinfo.name] = socket.userinfo;
-      socket.emit('updatechat', 'SERVER', SERVER_COLOR, 'you have connected');
-      socket.emit("updatechat", "SERVER", SERVER_COLOR, '...use awsd to move')
-      socket.broadcast.emit('updatechat', 'SERVER', SERVER_COLOR, socket.userinfo.name + ' has connected');
-      io.sockets.emit('updateusers', users); 
+
+      io.sockets.emit('updateusers', users);
    });
 
    socket.on('sendchat', (msg) => {
@@ -53,10 +51,7 @@ io.on('connection', (socket) => {
                  let i = 0;
                  for (user in users) {
                      if (i === randomNum) {
-                         users[user].it = true;
-                         io.to(users[user].id).emit('tagged');
-                         personIt = users[user].name;
-                         someoneIt = true;
+                         playerTagged(users[user]);
                      }
                      i++;
                  }
@@ -101,10 +96,10 @@ io.on('connection', (socket) => {
    });
 
    function checkCollision(player){
-       let collidingWith = [];
         for (u in users){
             if (player === users[u])
                 continue;
+
             // aliases
             let px = player.pos.x;
             let py = player.pos.y;
@@ -117,60 +112,25 @@ io.on('connection', (socket) => {
             // check vertical alignment
             let vert = Math.abs(py - uy) < buff;
             let horz = Math.abs(px - ux) < buff;
-            if (vert && horz)
-                collidingWith.push(users[u]);
+
+            if (vert && horz) {
+                player.toggleTag();
+                playerTagged(users[u]);
+                break;
+            }
         }
-        if (collidingWith.length > 0){
-            let tagString = player.name + " tagging: ";
-            collidingWith.forEach((chump) => {
-                tagString += " " + chump.name + " ";
-                chump.pos = chump.startPos;
-            })
-            console.log(tagString);
-        }
-        return collidingWith;
    }
 
-    function initPos(canvas) {
-        let corner = cornerCount % 4;
-        cornerCount++;
-        console.log("Corner: " + corner);
-        let pos = {};
-        switch(corner) {
-            case 0:
-                pos = {
-                    'x': 0,
-                    'y': 0
-                };
-                break;
-            case 1:
-                pos = {
-                    'x': canvas.width,
-                    'y': 0
-                };
-                break;
-
-            case 2:
-                pos = {
-                    'x': canvas.width,
-                    'y': canvas.height
-                };
-                break;
-
-            case 3:
-                pos = {
-                    'x': 0,
-                    'y': canvas.height
-                };
-                break;
-            default:
-                pos = {
-                    'x': canvas.width / 2,
-                    'y': canvas.height / 2
-                };
-        }
-        return pos;
-    }
+   function playerTagged(pTag){
+       pTag.pos = { 'x': pTag.startPos.x, 'y': pTag.startPos.y };
+       pTag.toggleTag();
+       io.sockets.emit('updateusers', users);
+       personIt = pTag.name;
+       someoneIt = true;
+       let itSocket = io.sockets.connected[pTag.id];
+       itSocket.emit('updatechat', 'SERVER', SERVER_COLOR, 'you are it!');
+       itSocket.broadcast.emit('updatechat', 'SERVER', SERVER_COLOR, pTag.name + ' is it!');
+   }
 
    setInterval(() => {
        io.sockets.emit('state', users);

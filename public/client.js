@@ -1,6 +1,6 @@
 let usersOnline = {};
 let userName = null; // get from some sort of storage eventually
-const itSymbol = "  [IT]";
+const itSymbol = "  [!]";
 const itHTML = "<span style='color:red'>" + itSymbol + "</span>";
 window.onload = function(){  
   let socket = io();
@@ -50,13 +50,16 @@ window.onload = function(){
       uDisplay.style.color = user.color;
       uDisplay.innerHTML = user.name;
 
+      // put color chooser in head
       let chooseColor = document.createElement('input');
+      chooseColor.id = "chooseColor";
       chooseColor.type = "color";
       chooseColor.value = user.color;
       chooseColor.style.marginLeft = "15px";
       chooseColor.style.border = "none";
       chooseColor.style.cursor = "pointer";
 
+      // event listener for color chooser
       chooseColor.addEventListener("input", () => {
          let color = chooseColor.value;
          if(validateColor(color)) {
@@ -73,6 +76,9 @@ window.onload = function(){
       });
 
       function validateColor(color){
+          // checks:
+          // color doesn't match play area background
+          // color doesn't match other player color
           return true;
       }
 
@@ -129,8 +135,25 @@ window.onload = function(){
     user has joined or left
   */
   socket.on('updateusers', (users) => {
-    usersOnline = users;
-    updateUsers();
+      usersOnline = users;
+      let uo = document.querySelector('#usersOnline');
+      uo.innerHTML = '';
+      for (user in users){
+          let li = document.createElement('li');
+          li.style.borderRight = "50px solid " + users[user].color;
+          li.innerHTML = users[user].name;
+          if (users[user].it)
+              li.innerHTML += itHTML;
+          if (users[user].name == userName){
+              let it = users[user].it;
+              let uDisplay = document.querySelector("#uDisplay");
+              uDisplay.innerHTML = userName + ((it) ? itHTML:"");
+              let chooseColor = document.querySelector("#chooseColor");
+              chooseColor.value = users[user].color;
+              uDisplay.style.color = users[user].color;
+          }
+          uo.appendChild(li);
+      }
   });
 
   /*
@@ -147,22 +170,6 @@ window.onload = function(){
       head.removeChild(uDisplay);
   });
 
-  /*
-    updates the UI
-  */
-    function updateUsers(){
-        let uo = document.querySelector('#usersOnline');
-        uo.innerHTML = '';
-        for (user in usersOnline){
-            let li = document.createElement('li');
-            li.style.borderRight = "50px solid " + usersOnline[user].color;
-            li.innerHTML = usersOnline[user].name;
-            if (usersOnline[user].it)
-                li.innerHTML += itHTML;
-            uo.appendChild(li);
-        }
-    }
-
     let btn = document.querySelector("#closeSidebar");
     btn.addEventListener("click", () => {
         let sidebar = document.querySelector("#sidebar");
@@ -171,14 +178,6 @@ window.onload = function(){
         else
             sidebar.style.display = "none";
     });
-
-  /*
-    client has been tagged
-  */
-  socket.on('tagged', () => {
-      let uDisplay = document.querySelector("#uDisplay");
-      uDisplay.innerHTML = userName + itHTML;
-  });
 
   /*
     SEND THE USERS MOVEMENT TO THE SERVER
@@ -218,6 +217,7 @@ window.onload = function(){
     let ctx = canvas.getContext('2d');
 
     function draw(user) {
+        console.log(user);
         ctx.beginPath();
         ctx.arc(user.pos.x, user.pos.y, user.size, 0, Math.PI * 2);
         ctx.fillStyle = user.color;
