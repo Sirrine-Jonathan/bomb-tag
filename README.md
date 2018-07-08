@@ -11,7 +11,9 @@ Power Ups! (Different for IT than for the ones being chaced?)
 
 
       **
+Room size
 Minimap?
 Leaderboard?
 Rooms?
-How many players a map?
+How many players a map? 4-8-16-infinity
+Hiding spots?
