@@ -5,6 +5,11 @@ const itHTML = "<span style='color:red'>" + itSymbol + "</span>";
 window.onload = function(){  
   let socket = io();
 
+  //get login status
+    FB.getLoginStatus((res) => {
+        console.log(res);
+    })
+
 
   /*
     User Enters Game

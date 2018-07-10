@@ -1,7 +1,11 @@
+// Basic Requirements
 const express = require('express');
 const app = express();
 let http = require('http').Server(app);
 let io = require('socket.io')(http);
+let fs = require("fs");
+
+// Game Globals
 const User = require('./User.js');
 const port = (process.env.PORT) ? process.env.PORT:8888;
 let users = {};
@@ -9,6 +13,29 @@ let numOfUsers = 0;
 let someoneIt = false;
 let personIt = null;
 const SERVER_COLOR = "#FFFFFF";
+
+// Facebook Auth
+const passport = require('passport');
+const FacebookStrategy = require('passport-facebook').Strategy;
+let content = fs.readFileSync("fbcred.json");
+let fbCredObj = JSON.parse(content);
+
+passport.use(new FacebookStrategy({
+       clientID: fbCredObj.app_id,
+       clientSecret: fbCredObj.app_secret,
+       callbackURL: fbCredObj.callback
+    },
+    function (accessToken, refreshToken, profile, done){
+        User.findOrCreate(..., function(err, user) {
+            if (err) { return done(err); }
+            done(null, user);
+        });
+    }
+));
+app.get('/auth/facebook', passport.authenticate('facebook'));
+app.get('/fblogin', (req, res) => {
+    console.log(req);
+});
 
 app.use(express.static('public'));
 io.on('connection', (socket) => {
