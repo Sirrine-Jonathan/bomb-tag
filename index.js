@@ -2,8 +2,10 @@
 const express = require('express');
 const app = express();
 let http = require('http').Server(app);
+let cookieParser = require('cookie-parser');
+let bodyParse = require('body-parser');
+let session = require('express-session');
 let io = require('socket.io')(http);
-let fs = require("fs");
 
 // Game Globals
 const User = require('./User.js');
@@ -15,29 +17,38 @@ let personIt = null;
 const SERVER_COLOR = "#FFFFFF";
 
 // Facebook Auth
+
 const passport = require('passport');
 const FacebookStrategy = require('passport-facebook').Strategy;
-let content = fs.readFileSync("fbcred.json");
-let fbCredObj = JSON.parse(content);
+let fbCred = require('./fbcred.js');
 
 passport.use(new FacebookStrategy({
-       clientID: fbCredObj.app_id,
-       clientSecret: fbCredObj.app_secret,
-       callbackURL: fbCredObj.callback
+        clientID: fbCred.app_id,
+        clientSecret: fbCred.app_secret,
+        callbackURL: fbCred.callback,
+        profileFields: ['displayName','photos']
     },
-    function (accessToken, refreshToken, profile, done){
-        User.findOrCreate(..., function(err, user) {
-            if (err) { return done(err); }
-            done(null, user);
-        });
+    function(accessToken, refreshToken, profile, cb) {
+        cb(profile);
     }
 ));
-app.get('/auth/facebook', passport.authenticate('facebook'));
-app.get('/fblogin', (req, res) => {
-    console.log(req);
-});
+
+
 
 app.use(express.static('public'));
+app.use(cookieParser());
+app.use(session({ secret: "bombtagsession" }));
+app.use(passport.initialize());
+app.use(passport.session());
+app.get('/fblogin',
+    function(req, res) {
+        res.redirect('/');
+});
+
+app.get('/', (req, res) => {
+   console.log(req);
+});
+
 io.on('connection', (socket) => {
    io.emit('updateusers', users);
 

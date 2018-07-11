@@ -8,7 +8,12 @@ window.onload = function(){
   //get login status
     FB.getLoginStatus((res) => {
         console.log(res);
-    })
+    });
+
+  let fbbtn = document.querySelector("#fbbtn");
+  fbbtn.addEventListener("click", () => {
+      location.href = "/fblogin";
+  });
 
 
   /*
