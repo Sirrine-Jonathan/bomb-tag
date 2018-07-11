@@ -15,7 +15,7 @@
                 appId      : '2072017049705163',
                 cookie     : true,
                 xfbml      : true,
-                version    : '3.0'
+                version    : '3.0.0'
             });
 
             FB.AppEvents.logPageView();
@@ -60,9 +60,13 @@
 
         <div id="header">
           <span id="title">Bomb Tag  </span><span id="closeSidebar" class="btn btn-small">Toggle Sidebar</span><br />
-          <input id="usernameInput" type="text" placeholder="username"/>
+          <input id="usernameInput" type="text" placeholder="Enter a username"/>
           <a class="btn btn-facebook" id="fbbtn">
-              <span class="fa fa-facebook"> Sign in </span>
+              <span class="fa fa-facebook"></span>
+          </a>
+          <span id="uDisplay" style="display: none"></span>
+          <a class="btn" id="logoutBtn" href="/logout">
+              <span class="fa fa-logout"> Log out </span>
           </a>
           <span id="usernameError" class="error"></span>
         </div>

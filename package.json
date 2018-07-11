@@ -4,14 +4,15 @@
   "description": "a socket.io game",
   "dependencies": {
     "body-parser": "^1.18.3",
+    "cookie-parser": "",
     "express": "^4.15.2",
     "express-session": "^1.15.6",
     "npm": "^6.1.0",
     "passport": "^0.4.0",
     "passport-facebook": "^2.1.1",
+    "path": "^0.12.7",
     "save": "^2.3.2",
-    "socket.io": "^2.1.1",
-    "cookie-parser": ""
+    "socket.io": "^2.1.1"
   },
   "main": "index.js",
   "devDependencies": {},
