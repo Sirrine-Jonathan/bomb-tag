@@ -16,10 +16,9 @@ let numOfUsers = 0;
 let someoneIt = false;
 let personIt = null;
 const SERVER_COLOR = "#FFFFFF";
-let comingFromFacebook = false;
 
 // Facebook Auth
-
+let comingFromFacebook = false;
 const passport = require('passport');
 const FacebookStrategy = require('passport-facebook').Strategy;
 let fbCred = require('./fbcred.js');
@@ -61,7 +60,6 @@ app.get('/', (req, res) => {
     });
 
     if (req.session.redirectFromFacebook){
-        console.log("redirected from fb");
         redirectFromFacebook = true;
         io.on('connection', (socket) => {
             if (redirectFromFacebook) {
@@ -70,11 +68,8 @@ app.get('/', (req, res) => {
                 redirectFromFacebook = false;
             }
         });
-        //socket.emit('loggedOnViaFacebook', req.user);
     }
     else {
-        console.log("not redirected from fb");
-        console.log(req.user);
         req.session.redirectFromFacebook = false;
     }
 });
@@ -189,7 +184,7 @@ io.on('connection', (socket) => {
 
    function checkCollision(player){
         for (u in users){
-            if (player === users[u])
+            if (player === users[u] || !player)
                 continue;
 
             // aliases
@@ -225,6 +220,15 @@ io.on('connection', (socket) => {
    }
 
    setInterval(() => {
+       if (someoneIt) {
+           users[personIt].time -= (1 / 60); //one second each frame
+           io.sockets.emit('updateusers', users);
+           if (users[personIt].time <= 0){
+               let itSocket = io.sockets.connected[users[personIt].id];
+               itSocket.disconnect();
+           }
+       }
+       //io.sockets.emit('updateusers', users);
        io.sockets.emit('state', users);
        if (someoneIt)
            checkCollision(users[personIt]);
