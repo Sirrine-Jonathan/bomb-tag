@@ -220,17 +220,17 @@ window.onload = function(){
     SEND THE USERS MOVEMENT TO THE SERVER
     user controls the player with arrow keys
   */
-  let movement = {   up: false,  down: false,
-                   left: false, right: false   };
+     let movement = {   up: false,  down: false,
+        left: false, right: false   };
     document.addEventListener('keydown', (e) => {
-      if (e.key === "ArrowRight" || e.key === "d")
-          movement.right = true;
-      else if (e.key === "ArrowLeft" || e.key === "a")
-          movement.left = true;
-      else if (e.key === "ArrowUp" || e.key === "w")
-          movement.up = true;
-      else if (e.key === "ArrowDown" || e.key === "s")
-          movement.down = true;
+        if (e.key === "ArrowRight" || e.key === "d")
+            movement.right = true;
+        else if (e.key === "ArrowLeft" || e.key === "a")
+            movement.left = true;
+        else if (e.key === "ArrowUp" || e.key === "w")
+            movement.up = true;
+        else if (e.key === "ArrowDown" || e.key === "s")
+            movement.down = true;
     });
     document.addEventListener('keyup', (e) => {
         if (e.key === "ArrowRight" || e.key === "d")

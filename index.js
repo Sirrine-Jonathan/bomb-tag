@@ -221,7 +221,7 @@ io.on('connection', (socket) => {
 
    setInterval(() => {
        if (someoneIt) {
-           /*
+
            users[personIt].time -= (1 / 60); //one second each frame
 
            io.sockets.emit('updateusers', users);
@@ -229,7 +229,7 @@ io.on('connection', (socket) => {
                let itSocket = io.sockets.connected[users[personIt].id];
                itSocket.disconnect();
            }
-           */
+
        }
        //io.sockets.emit('updateusers', users);
        io.sockets.emit('state', users);
@@ -237,8 +237,6 @@ io.on('connection', (socket) => {
            checkCollision(users[personIt]);
    }, 1000 / 60);
 });
-
-
 
 http.listen(port, () => {
    console.log('listening on :' + port);
