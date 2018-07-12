@@ -178,7 +178,7 @@ window.onload = function(){
       for (user in users){
           let li = document.createElement('li');
           li.style.borderRight = "50px solid " + users[user].color;
-          li.innerHTML = users[user].name;
+          li.innerHTML = users[user].name + " " + (new Date(users[user].time).getTime());
           if (users[user].it)
               li.innerHTML += itHTML;
           if (users[user].name == userName){
@@ -263,10 +263,13 @@ window.onload = function(){
     }
 
     socket.on('state', (users) => {
+
+        // draw all users
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         for (let u in users){
             draw(users[u]);
         }
+
     })
 
 };

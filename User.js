@@ -12,6 +12,7 @@ class User {
 			"width": canvas.width,
 			"height": canvas.height
 		};
+		this.time = User.startTime;
 		this.initPos();
 		User.cornerCount++;
 	}
@@ -76,5 +77,6 @@ class User {
 
 }
 User.cornerCount = 0;
+User.startTime = 50; //60 * 5; // 60 seconds * 5 minutes
 
 module.exports = User;
