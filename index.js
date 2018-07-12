@@ -16,6 +16,7 @@ let numOfUsers = 0;
 let someoneIt = false;
 let personIt = null;
 const SERVER_COLOR = "#FFFFFF";
+let comingFromFacebook = false;
 
 // Facebook Auth
 
@@ -61,10 +62,13 @@ app.get('/', (req, res) => {
 
     if (req.session.redirectFromFacebook){
         console.log("redirected from fb");
+        redirectFromFacebook = true;
         io.on('connection', (socket) => {
-            console.log("on connect called");
-            socket.emit('loggedOnViaFacebook', req.user);
-            req.session.redirectFromFacebook = false;
+            if (redirectFromFacebook) {
+                socket.emit('loggedOnViaFacebook', req.user);
+                req.session.redirectFromFacebook = false;
+                redirectFromFacebook = false;
+            }
         });
         //socket.emit('loggedOnViaFacebook', req.user);
     }
