@@ -18,7 +18,6 @@ let personIt = null;
 const SERVER_COLOR = "#FFFFFF";
 
 // Facebook Auth
-let comingFromFacebook = false;
 const passport = require('passport');
 const FacebookStrategy = require('passport-facebook').Strategy;
 let fbCred = require('./fbcred.js');
@@ -77,16 +76,16 @@ app.get('/', (req, res) => {
 io.on('connection', (socket) => {
 
     // initialization
-    io.emit('updateusers', users);
+    //io.emit('updateusers', users);
     app.get('/fblogin',
         passport.authenticate('facebook')
     );
 
     app.get('/fblogin/return',
-        passport.authenticate('facebook', { failureRedirect: '/login' }),
+        passport.authenticate('facebook', { failureRedirect: '/' }),
         function(req, res){
             req.session.redirectFromFacebook = true;
-            req.session.socketid = socket.id;
+            //req.session.socketid = socket.id;
             res.redirect('/');
     });
 
@@ -111,7 +110,7 @@ io.on('connection', (socket) => {
       socket.userinfo = newUser;
       users[socket.userinfo.name] = socket.userinfo;
 
-      io.sockets.emit('updateusers', users);
+      //io.sockets.emit('updateusers', users);
    });
 
    socket.on('sendchat', (msg) => {
@@ -145,7 +144,7 @@ io.on('connection', (socket) => {
          }
 
          // update clients
-         io.sockets.emit('updateusers', users);
+         //io.sockets.emit('updateusers', users);
          socket.emit('disconnected');
          socket.emit('updatechat', 'SERVER', SERVER_COLOR, "You have disconnected");
          socket.broadcast.emit('updatechat', 'SERVER', SERVER_COLOR, socket.userinfo.name + ' has disconnected');
@@ -155,7 +154,7 @@ io.on('connection', (socket) => {
    socket.on('userchanged', (data) => {
        users[data.name].color = data.color;
        users[data.name].colorStore = data.color; // POSSIBLY NEEDS TO BE CHANGED / REMOVED
-       io.sockets.emit('updateusers', users);
+       //io.sockets.emit('updateusers', users);
    });
 
 
@@ -211,7 +210,7 @@ io.on('connection', (socket) => {
    function playerTagged(pTag){
        pTag.pos = { 'x': pTag.startPos.x, 'y': pTag.startPos.y };
        pTag.toggleTag();
-       io.sockets.emit('updateusers', users);
+       //io.sockets.emit('updateusers', users);
        personIt = pTag.name;
        someoneIt = true;
        let itSocket = io.sockets.connected[pTag.id];
@@ -219,19 +218,22 @@ io.on('connection', (socket) => {
        itSocket.broadcast.emit('updatechat', 'SERVER', SERVER_COLOR, pTag.name + ' is it!');
    }
 
+   let lastUpdateTime = (new Date()).getTime();
    setInterval(() => {
-       if (someoneIt) {
-
-           users[personIt].time -= (1 / 60); //one second each frame
-
-           io.sockets.emit('updateusers', users);
-           if (users[personIt].time <= 0){
+       let currentTime = (new Date()).getTime();
+       let timeDifference = currentTime - lastUpdateTime;
+       lastUpdateTime = currentTime;
+       if (someoneIt && users[personIt].time > 1) {
+           users[personIt].time -= (1 / 120);
+           if (users[personIt].time <= 1){
                let itSocket = io.sockets.connected[users[personIt].id];
-               itSocket.disconnect();
+               users[personIt].color = "#000000";
+               users[personIt].colorStore = "#000000";
+               //make someone else it
+               //itSocket.disconnect();
            }
 
        }
-       //io.sockets.emit('updateusers', users);
        io.sockets.emit('state', users);
        if (someoneIt)
            checkCollision(users[personIt]);

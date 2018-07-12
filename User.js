@@ -72,13 +72,13 @@ class User {
 			this.speed = 2;
 		} else {
 			this.it = true;
-			this.color = "red";
+			this.color = "#ff0000";
 			this.speed = 4;
 		}
 	}
 
 }
 User.cornerCount = 0;
-User.startTime = 100; //60 * 5; // 60 seconds * 5 minutes
+User.startTime = 120; //seconds
 
 module.exports = User;

@@ -11,8 +11,20 @@ window.onload = function(){
   });
 
   socket.on('loggedOnViaFacebook', (data) => {
+      console.log(data);
       let username = data.displayName;
       let photoURL = data.photos[0];
+
+      // validate unique name constraint
+      let validUsername = validateUsername(username);
+      if (!validUsername) {
+          let errorMsg = document.querySelector('#usernameError');
+          errorMsg.innerHTML = "user already signed in";
+          return;
+      } else {
+          let errorMsg = document.querySelector('#usernameError');
+          errorMsg.innerHTML = '';
+      }
 
       let canvas = document.querySelector('#playarea');
       let user = new User(socket.id, username, canvas);
@@ -35,7 +47,7 @@ window.onload = function(){
           socket.emit('movement', data);
       }, 1000 / 60);
 
-  })
+  });
 
 
   /*
@@ -94,7 +106,6 @@ window.onload = function(){
 
         // update toLeave group
         let uDisplay = toLeave.querySelector('#uDisplay');
-        uDisplay.style.color = user.color;
         uDisplay.innerHTML = user.name;
 
         // put color chooser in head
@@ -105,7 +116,6 @@ window.onload = function(){
         chooseColor.addEventListener("input", () => {
             let color = chooseColor.value;
             if (validateColor(color)) {
-                uDisplay.style.color = color;
                 usersOnline[socket.userinfo.name].color = color;
                 let data = {
                     'name': socket.userinfo.name,
@@ -171,6 +181,7 @@ window.onload = function(){
   /*
     user has joined or left
   */
+  /*
   socket.on('updateusers', (users) => {
       usersOnline = users;
       let uo = document.querySelector('#usersOnline');
@@ -192,6 +203,31 @@ window.onload = function(){
           uo.appendChild(li);
       }
   });
+  */
+
+
+  function addUserToScoreBoard(user, board){
+      let li = document.createElement('li');
+      li.style.borderRight = "50px solid " + user.color;
+      li.innerHTML = user.name + " " + buildTime(user.time);
+      if (user.it)
+          li.innerHTML += itHTML;
+      if (user.name == userName){
+          let it = user.it;
+          let uDisplay = document.querySelector("#uDisplay");
+          uDisplay.innerHTML = userName + ((it) ? itHTML:"");
+          let chooseColor = document.querySelector("#chooseColor");
+          chooseColor.value = user.color;
+      }
+      board.appendChild(li);
+  }
+
+  function buildTime(num){
+      let min = Math.floor(num / 60);
+      let sec = Math.floor(num - (min * 60));
+      sec = (sec < 10) ? "0"+sec:sec;
+      return min + ":" + sec;
+  }
 
   /*
     client disconnected
@@ -263,13 +299,16 @@ window.onload = function(){
     }
 
     socket.on('state', (users) => {
+        usersOnline = users;
 
         // draw all users
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let uo = document.querySelector('#usersOnline');
+        uo.innerHTML = '';
         for (let u in users){
             draw(users[u]);
+            addUserToScoreBoard(users[u], uo);
         }
-
     })
 
 };
