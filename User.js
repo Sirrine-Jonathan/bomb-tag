@@ -69,14 +69,16 @@ class User {
 		if (this.it){
 			this.it = false;
 			this.color = this.colorStore;
+			this.speed = 2;
 		} else {
 			this.it = true;
 			this.color = "red";
+			this.speed = 4;
 		}
 	}
 
 }
 User.cornerCount = 0;
-User.startTime = 50; //60 * 5; // 60 seconds * 5 minutes
+User.startTime = 100; //60 * 5; // 60 seconds * 5 minutes
 
 module.exports = User;
