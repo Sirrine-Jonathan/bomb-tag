@@ -5,6 +5,38 @@ const itHTML = "<span style='color:red'>" + itSymbol + "</span>";
 window.onload = function(){  
   let socket = io();
 
+  let fbbtn = document.querySelector("#fbbtn");
+  fbbtn.addEventListener("click", () => {
+    location.href = "/fblogin";
+  });
+
+  socket.on('loggedOnViaFacebook', (data) => {
+      let username = data.displayName;
+      let photoURL = data.photos[0];
+
+      let canvas = document.querySelector('#playarea');
+      let user = new User(socket.id, username, canvas);
+      user.photoURL = photoURL;
+      socket.userinfo = user;
+      updateHeadAfterLogin(user);
+
+      // update other users
+      socket.emit('new user', user);
+
+      // send player movement to server
+      setInterval(function() {
+          let data = {
+              'movement': movement,
+              'limits': {
+                  'right': canvas.width,
+                  'bottom': canvas.height
+              }
+          };
+          socket.emit('movement', data);
+      }, 1000 / 60);
+
+  })
+
 
   /*
     User Enters Game
@@ -18,78 +50,25 @@ window.onload = function(){
       userName = username;
 
       // validate unique name constraint
-      let unique = true;
-      for (let user in usersOnline){
-        if (usersOnline[user].name === username){
-          unique = false;
-          break;
+        let validUsername = validateUsername(username);
+        if (!validUsername) {
+            let errorMsg = document.querySelector('#usernameError');
+            errorMsg.innerHTML = "username taken";
+            return;
+        } else {
+            let errorMsg = document.querySelector('#usernameError');
+            errorMsg.innerHTML = '';
         }
-      }
-      if (!unique){
-        let errorMsg = document.querySelector('#usernameError');
-        errorMsg.innerHTML = "username taken";
-        return;
-      } else {
-        let errorMsg = document.querySelector('#usernameError');
-        errorMsg.innerHTML = '';
-      }
-
       let canvas = document.querySelector('#playarea');
       let user = new User(socket.id, username, canvas);
       socket.userinfo = user;
 
-      // empty head
-      let head = document.getElementById('header');
-      let errorMsg = document.querySelector('#usernameError');
-      uInput.style.display = "none";
-      errorMsg.style.display = "none";
-
-      // put user display in head
-      let uDisplay = document.createElement('span');
-      uDisplay.id = "uDisplay";
-      uDisplay.style.color = user.color;
-      uDisplay.innerHTML = user.name;
-
-      // put color chooser in head
-      let chooseColor = document.createElement('input');
-      chooseColor.id = "chooseColor";
-      chooseColor.type = "color";
-      chooseColor.value = user.color;
-      chooseColor.style.marginLeft = "15px";
-      chooseColor.style.border = "none";
-      chooseColor.style.cursor = "pointer";
-
-      // event listener for color chooser
-      chooseColor.addEventListener("input", () => {
-         let color = chooseColor.value;
-         if(validateColor(color)) {
-             uDisplay.style.color = color;
-             usersOnline[socket.userinfo.name].color = color;
-             let data = {
-                 'name': socket.userinfo.name,
-                 'color': color
-             };
-             socket.emit('userchanged', data);
-         } else {
-             chooseColor.value = user.color;
-         }
-      });
-
-      function validateColor(color){
-          // checks:
-          // color doesn't match play area background
-          // color doesn't match other player color
-          return true;
-      }
-
-      head.appendChild(uDisplay);
-      head.appendChild(chooseColor);
+      updateHeadAfterLogin(user);
 
       // update other users
       socket.emit('new user', user);
 
       // send player movement to server
-
       setInterval(function() {
           let data = {
               'movement': movement,
@@ -102,6 +81,64 @@ window.onload = function(){
       }, 1000 / 60);
     }
   });
+
+
+    function updateHeadAfterLogin(user) {
+        let head = document.querySelector('#header');
+        let toEnter = head.querySelector('#toLogInGroup');
+        let toLeave = head.querySelector('#toLogOutGroup');
+        let errorMsg = head.querySelector('#usernameError');
+        toEnter.style.display = 'none';
+        toLeave.style.display = 'block';
+        errorMsg.style.display = "none";
+
+        // update toLeave group
+        let uDisplay = toLeave.querySelector('#uDisplay');
+        uDisplay.style.color = user.color;
+        uDisplay.innerHTML = user.name;
+
+        // put color chooser in head
+        let chooseColor = toLeave.querySelector('#chooseColor');
+        chooseColor.value = user.color;
+
+        // event listener for color chooser
+        chooseColor.addEventListener("input", () => {
+            let color = chooseColor.value;
+            if (validateColor(color)) {
+                uDisplay.style.color = color;
+                usersOnline[socket.userinfo.name].color = color;
+                let data = {
+                    'name': socket.userinfo.name,
+                    'color': color
+                };
+                socket.emit('userchanged', data);
+            } else {
+                chooseColor.value = user.color;
+            }
+        });
+    }
+
+    function updateHeadAfterLogout(){
+        // revert head to logged out state
+    }
+
+    function validateColor(color){
+        // checks:
+        // color doesn't match play area background
+        // color doesn't match other player color
+        return true;
+    }
+
+    function validateUsername(username) {
+        let unique = true;
+        for (let user in usersOnline) {
+            if (usersOnline[user].name === username) {
+                unique = false;
+                break;
+            }
+        }
+        return unique;
+    }
 
   /*
     send chat

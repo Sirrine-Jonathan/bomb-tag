@@ -1,7 +1,14 @@
+// Basic Requirements
 const express = require('express');
 const app = express();
 let http = require('http').Server(app);
+let cookieParser = require('cookie-parser');
+let path = require('path');
+let bodyParse = require('body-parser');
+let session = require('express-session');
 let io = require('socket.io')(http);
+
+// Game Globals
 const User = require('./User.js');
 const port = (process.env.PORT) ? process.env.PORT:8888;
 let users = {};
@@ -9,10 +16,92 @@ let numOfUsers = 0;
 let someoneIt = false;
 let personIt = null;
 const SERVER_COLOR = "#FFFFFF";
+let comingFromFacebook = false;
 
-app.use(express.static('public'));
+// Facebook Auth
+
+const passport = require('passport');
+const FacebookStrategy = require('passport-facebook').Strategy;
+let fbCred = require('./fbcred.js');
+passport.use(new FacebookStrategy({
+        clientID: fbCred.app_id,
+        clientSecret: fbCred.app_secret,
+        callbackURL: fbCred.callback,
+        profileFields: ['displayName','photos']
+    },
+    function(accessToken, refreshToken, profile, cb) {
+        return cb(null, profile);
+    }
+));
+
+passport.serializeUser(function(user, cb) {
+    cb(null, user);
+});
+
+passport.deserializeUser(function(obj, cb) {
+    cb(null, obj);
+});
+
+app.use(express.static('public', { index: false }));
+app.use(cookieParser());
+app.use(session({
+    secret: "bombtagsession",
+    saveUninitialized: false,
+    resave: false,
+    unset: 'destroy'
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+app.get('/', (req, res) => {
+
+    const fileDirectory = path.resolve(__dirname, '.', 'public');
+    res.sendFile("index.html", { root: fileDirectory}, (err) => {
+        res.end();
+        if (err) throw(err);
+    });
+
+    if (req.session.redirectFromFacebook){
+        console.log("redirected from fb");
+        redirectFromFacebook = true;
+        io.on('connection', (socket) => {
+            if (redirectFromFacebook) {
+                socket.emit('loggedOnViaFacebook', req.user);
+                req.session.redirectFromFacebook = false;
+                redirectFromFacebook = false;
+            }
+        });
+        //socket.emit('loggedOnViaFacebook', req.user);
+    }
+    else {
+        console.log("not redirected from fb");
+        console.log(req.user);
+        req.session.redirectFromFacebook = false;
+    }
+});
+
 io.on('connection', (socket) => {
-   io.emit('updateusers', users);
+
+    // initialization
+    io.emit('updateusers', users);
+    app.get('/fblogin',
+        passport.authenticate('facebook')
+    );
+
+    app.get('/fblogin/return',
+        passport.authenticate('facebook', { failureRedirect: '/login' }),
+        function(req, res){
+            req.session.redirectFromFacebook = true;
+            req.session.socketid = socket.id;
+            res.redirect('/');
+    });
+
+    app.get('/logout', function(req, res){
+        req.session.destroy((err) => {
+            req.logout();
+            req.session = null;
+            res.redirect('/');
+        });
+    });
 
    socket.on('new user', (user) => {
       let newUser = new User(user.id, user.name, user.canvas, user.color);
@@ -37,7 +126,6 @@ io.on('connection', (socket) => {
    });
 
    socket.on('disconnect', () => {
-
       // only account for sockets that have joined
       if (socket.userinfo){
 
@@ -71,6 +159,7 @@ io.on('connection', (socket) => {
 
    socket.on('userchanged', (data) => {
        users[data.name].color = data.color;
+       users[data.name].colorStore = data.color; // POSSIBLY NEEDS TO BE CHANGED / REMOVED
        io.sockets.emit('updateusers', users);
    });
 
@@ -78,7 +167,10 @@ io.on('connection', (socket) => {
    socket.on('movement', (data) => {
        let movement = data.movement;
        let limits = data.limits;
-       let player = (socket.userinfo) ? users[socket.userinfo.name]:{};
+       let player = (socket.userinfo) ? users[socket.userinfo.name]:false;
+       if (!player){
+           return;
+       }
        if (player !== {} && player.pos && !isNaN(player.pos.x) && !isNaN(player.pos.y)) {
            if (movement.left && player.pos.x > player.size) {
                player.pos.x -= player.speed;

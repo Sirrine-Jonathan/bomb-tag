@@ -8,7 +8,28 @@
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
           integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script>
+        window.fbAsyncInit = function() {
+            FB.init({
+                appId      : '2072017049705163',
+                cookie     : true,
+                xfbml      : true,
+                version    : '3.0.0'
+            });
 
+            FB.AppEvents.logPageView();
+
+        };
+
+        (function(d, s, id){
+            var js, fjs = d.getElementsByTagName(s)[0];
+            if (d.getElementById(id)) {return;}
+            js = d.createElement(s); js.id = id;
+            js.src = "https://connect.facebook.net/en_US/sdk.js";
+            fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'facebook-jssdk'));
+    </script>
     <!--
     Bootstrap's JavaScript requires jQuery
 
@@ -38,8 +59,28 @@
       <div class="page-body">
 
         <div id="header">
-          <span id="title">Bomb Tag  </span><span id="closeSidebar" class="btn btn-small">Toggle Info</span><br />
-          <input id="usernameInput" type="text" placeholder="username"/>
+
+          <!-- top row -->
+          <span id="title">Bomb Tag  </span><span id="closeSidebar" class="btn btn-small">Toggle Sidebar</span><br />
+
+          <!-- sign in group -->
+          <div id="toLogInGroup">
+            <input id="usernameInput" type="text" placeholder="Enter a username"/>
+            <a class="btn btn-facebook" id="fbbtn">
+                <span class="fa fa-facebook"></span>
+            </a>
+          </div>
+
+          <!-- user signed in group-->
+          <div id="toLogOutGroup" style="display:none">
+            <span id="uDisplay"></span>
+            <input type="color" id="chooseColor" value="" />
+            <a class="btn" id="logoutBtn" href="/logout">
+                <span class="fa fa-logout"> Log out </span>
+            </a>
+          </div>
+
+          <!-- error -->
           <span id="usernameError" class="error"></span>
         </div>
         <div id="playareaContainer">
