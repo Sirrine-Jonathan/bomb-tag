@@ -221,12 +221,15 @@ io.on('connection', (socket) => {
 
    setInterval(() => {
        if (someoneIt) {
+           /*
            users[personIt].time -= (1 / 60); //one second each frame
+
            io.sockets.emit('updateusers', users);
            if (users[personIt].time <= 0){
                let itSocket = io.sockets.connected[users[personIt].id];
                itSocket.disconnect();
            }
+           */
        }
        //io.sockets.emit('updateusers', users);
        io.sockets.emit('state', users);
