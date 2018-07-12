@@ -5,11 +5,6 @@ const itHTML = "<span style='color:red'>" + itSymbol + "</span>";
 window.onload = function(){  
   let socket = io();
 
-  //get login status
-    FB.getLoginStatus((res) => {
-        console.log(res);
-    });
-
   let fbbtn = document.querySelector("#fbbtn");
   fbbtn.addEventListener("click", () => {
     location.href = "/fblogin";
@@ -89,26 +84,22 @@ window.onload = function(){
 
 
     function updateHeadAfterLogin(user) {
-        // empty head
-        let head = document.getElementById('header');
-        let errorMsg = document.querySelector('#usernameError');
-        uInput.style.display = "none";
+        let head = document.querySelector('#header');
+        let toEnter = head.querySelector('#toLogInGroup');
+        let toLeave = head.querySelector('#toLogOutGroup');
+        let errorMsg = head.querySelector('#usernameError');
+        toEnter.style.display = 'none';
+        toLeave.style.display = 'block';
         errorMsg.style.display = "none";
 
-        // put user display in head
-        let uDisplay = document.querySelector('#uDisplay');
-        uDisplay.style.display = "block";
+        // update toLeave group
+        let uDisplay = toLeave.querySelector('#uDisplay');
         uDisplay.style.color = user.color;
         uDisplay.innerHTML = user.name;
 
         // put color chooser in head
-        let chooseColor = document.createElement('input');
-        chooseColor.id = "chooseColor";
-        chooseColor.type = "color";
+        let chooseColor = toLeave.querySelector('#chooseColor');
         chooseColor.value = user.color;
-        chooseColor.style.marginLeft = "15px";
-        chooseColor.style.border = "none";
-        chooseColor.style.cursor = "pointer";
 
         // event listener for color chooser
         chooseColor.addEventListener("input", () => {
@@ -125,9 +116,6 @@ window.onload = function(){
                 chooseColor.value = user.color;
             }
         });
-
-        head.appendChild(uDisplay);
-        head.appendChild(chooseColor);
     }
 
     function updateHeadAfterLogout(){

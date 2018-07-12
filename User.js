@@ -72,7 +72,6 @@ class User {
 			this.it = true;
 			this.color = "red";
 		}
-		console.log(this.name + ", " + this.it + ", " + this.color);
 	}
 
 }

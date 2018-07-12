@@ -41,14 +41,14 @@ passport.deserializeUser(function(obj, cb) {
     cb(null, obj);
 });
 
-app.use(passport.initialize());
-app.use(passport.session());
-
-
-
 app.use(express.static('public', { index: false }));
 app.use(cookieParser());
-app.use(session({ secret: "bombtagsession" }));
+app.use(session({
+    secret: "bombtagsession",
+    saveUninitialized: false,
+    resave: false,
+    unset: 'destroy'
+}));
 app.use(passport.initialize());
 app.use(passport.session());
 app.get('/', (req, res) => {
@@ -60,12 +60,18 @@ app.get('/', (req, res) => {
     });
 
     if (req.session.redirectFromFacebook){
+        console.log("redirected from fb");
         io.on('connection', (socket) => {
+            console.log("on connect called");
             socket.emit('loggedOnViaFacebook', req.user);
+            req.session.redirectFromFacebook = false;
         });
+        //socket.emit('loggedOnViaFacebook', req.user);
     }
     else {
         console.log("not redirected from fb");
+        console.log(req.user);
+        req.session.redirectFromFacebook = false;
     }
 });
 
@@ -86,8 +92,11 @@ io.on('connection', (socket) => {
     });
 
     app.get('/logout', function(req, res){
-        req.logout();
-        res.redirect('/');
+        req.session.destroy((err) => {
+            req.logout();
+            req.session = null;
+            res.redirect('/');
+        });
     });
 
    socket.on('new user', (user) => {
@@ -113,7 +122,6 @@ io.on('connection', (socket) => {
    });
 
    socket.on('disconnect', () => {
-      console.log(socket);
       // only account for sockets that have joined
       if (socket.userinfo){
 
@@ -147,6 +155,7 @@ io.on('connection', (socket) => {
 
    socket.on('userchanged', (data) => {
        users[data.name].color = data.color;
+       users[data.name].colorStore = data.color; // POSSIBLY NEEDS TO BE CHANGED / REMOVED
        io.sockets.emit('updateusers', users);
    });
 
@@ -154,7 +163,10 @@ io.on('connection', (socket) => {
    socket.on('movement', (data) => {
        let movement = data.movement;
        let limits = data.limits;
-       let player = (socket.userinfo) ? users[socket.userinfo.name]:{};
+       let player = (socket.userinfo) ? users[socket.userinfo.name]:false;
+       if (!player){
+           return;
+       }
        if (player !== {} && player.pos && !isNaN(player.pos.x) && !isNaN(player.pos.y)) {
            if (movement.left && player.pos.x > player.size) {
                player.pos.x -= player.speed;

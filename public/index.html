@@ -59,15 +59,28 @@
       <div class="page-body">
 
         <div id="header">
+
+          <!-- top row -->
           <span id="title">Bomb Tag  </span><span id="closeSidebar" class="btn btn-small">Toggle Sidebar</span><br />
-          <input id="usernameInput" type="text" placeholder="Enter a username"/>
-          <a class="btn btn-facebook" id="fbbtn">
-              <span class="fa fa-facebook"></span>
-          </a>
-          <span id="uDisplay" style="display: none"></span>
-          <a class="btn" id="logoutBtn" href="/logout">
-              <span class="fa fa-logout"> Log out </span>
-          </a>
+
+          <!-- sign in group -->
+          <div id="toLogInGroup">
+            <input id="usernameInput" type="text" placeholder="Enter a username"/>
+            <a class="btn btn-facebook" id="fbbtn">
+                <span class="fa fa-facebook"></span>
+            </a>
+          </div>
+
+          <!-- user signed in group-->
+          <div id="toLogOutGroup" style="display:none">
+            <span id="uDisplay"></span>
+            <input type="color" id="chooseColor" value="" />
+            <a class="btn" id="logoutBtn" href="/logout">
+                <span class="fa fa-logout"> Log out </span>
+            </a>
+          </div>
+
+          <!-- error -->
           <span id="usernameError" class="error"></span>
         </div>
         <div id="playareaContainer">
