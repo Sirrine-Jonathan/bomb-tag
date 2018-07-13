@@ -5,12 +5,12 @@ const itHTML = "<span style='color:red'>" + itSymbol + "</span>";
 window.onload = function(){  
   let socket = io();
 
-
+    /*
     let fbbtn = document.querySelector("#fbbtn");
     fbbtn.addEventListener("click", () => {
       location.href = "/fblogin";
     });
-    /*
+
 
       function statusChangeCallback(res){
           console.log("...status changed");
