@@ -4,6 +4,7 @@ const app = express();
 let http = require('http').Server(app);
 let cookieParser = require('cookie-parser');
 let path = require('path');
+let logger = require('morgan');
 let bodyParse = require('body-parser');
 let session = require('express-session');
 let io = require('socket.io')(http);
@@ -42,6 +43,7 @@ passport.deserializeUser(function(obj, cb) {
 
 app.use(express.static('public', { index: false }));
 app.use(cookieParser());
+app.use(logger('tiny'));
 app.use(session({
     secret: "bombtagsession",
     saveUninitialized: false,
@@ -81,11 +83,10 @@ io.on('connection', (socket) => {
         passport.authenticate('facebook')
     );
 
-    app.get('/fblogin/return',
+    app.get('/fblogin/return*',
         passport.authenticate('facebook', { failureRedirect: '/' }),
         function(req, res){
             req.session.redirectFromFacebook = true;
-            //req.session.socketid = socket.id;
             res.redirect('/');
     });
 

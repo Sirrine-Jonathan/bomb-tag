@@ -1,5 +1,5 @@
 module.exports = {
-    "app_id": process.env.APP_ID || "2072017049705163",
-    "app_secret": process.env.APP_SECRET || "75cb23048038cd384a32cc56d7648499",
+    "app_id": process.env.APP_ID || "889848721207487",
+    "app_secret": process.env.APP_SECRET || "1036ef705c846219a4f3fd86aa8a26a7",
     "callback": process.env.CALLBACK || "https://localhost:8888/fblogin/return"
 };

@@ -5,10 +5,28 @@ const itHTML = "<span style='color:red'>" + itSymbol + "</span>";
 window.onload = function(){  
   let socket = io();
 
-  let fbbtn = document.querySelector("#fbbtn");
-  fbbtn.addEventListener("click", () => {
-    location.href = "/fblogin";
-  });
+
+    let fbbtn = document.querySelector("#fbbtn");
+    fbbtn.addEventListener("click", () => {
+      location.href = "/fblogin";
+    });
+    /*
+
+      function statusChangeCallback(res){
+          console.log("...status changed");
+          console.log(res);
+      }
+
+      function checkLoginState(){
+          console.log("checking login status...");
+          FB.getLoginStatus(function (response) {
+              statusChangeCallback(response);
+          })
+      }
+
+    checkLoginState();
+    */
+
 
   socket.on('loggedOnViaFacebook', (data) => {
       console.log(data);
@@ -290,7 +308,6 @@ window.onload = function(){
     let ctx = canvas.getContext('2d');
 
     function draw(user) {
-        console.log(user);
         ctx.beginPath();
         ctx.arc(user.pos.x, user.pos.y, user.size, 0, Math.PI * 2);
         ctx.fillStyle = user.color;

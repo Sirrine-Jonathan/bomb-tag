@@ -5,6 +5,13 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
+    <!-- You can use open graph tags to customize link previews.
+    Learn more: https://developers.facebook.com/docs/sharing/webmasters -->
+    <meta property="og:url"           content="https://bomb-tag.herokuapp.com/" />
+    <meta property="og:type"          content="website" />
+    <meta property="og:title"         content="Bomb Tag" />
+    <meta property="og:description"   content="Online multiplayer tag game" />
+    <!--<meta property="og:image"         content="" />-->
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
           integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
@@ -12,14 +19,11 @@
     <script>
         window.fbAsyncInit = function() {
             FB.init({
-                appId      : '2072017049705163',
+                appId      : /*'889848721207487'*/'2072017049705163',
                 cookie     : true,
                 xfbml      : true,
-                version    : '3.0.0'
+                version    : 'v3.0'
             });
-
-            FB.AppEvents.logPageView();
-
         };
 
         (function(d, s, id){
@@ -30,6 +34,17 @@
             fjs.parentNode.insertBefore(js, fjs);
         }(document, 'script', 'facebook-jssdk'));
     </script>
+
+    <!-- FACEBOOK LIKE BUTTON-->
+
+    <div id="fb-root"></div>
+        <script>(function(d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0];
+            if (d.getElementById(id)) return;
+            js = d.createElement(s); js.id = id;
+            js.src = 'https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v3.0&appId=2072017049705163&autoLogAppEvents=1';
+            fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'facebook-jssdk'));</script>
     <!--
     Bootstrap's JavaScript requires jQuery
 
@@ -61,21 +76,27 @@
         <div id="header">
 
           <!-- top row -->
-          <div
-                  class="fb-like"
-                  data-share="true"
-                  data-width="450"
-                  data-show-faces="true">
-
-          </div>
           <span id="title">Bomb Tag  </span><span id="closeSidebar" class="btn btn-small">Toggle Sidebar</span><br />
 
           <!-- sign in group -->
           <div id="toLogInGroup">
             <input id="usernameInput" type="text" placeholder="Enter a username"/>
+            <fb:login-button
+                    scope="public_profile, email"
+                    onlogin="(function(){ location.href = '/fblogin/return'; })()">
+            </fb:login-button>
+            <!--
             <a class="btn btn-facebook" id="fbbtn">
-                <span class="fa fa-facebook"></span>
+              <span class="fa fa-facebook"></span>
             </a>
+            -->
+            <br />
+
+
+
+
+
+
           </div>
 
           <!-- user signed in group-->
@@ -85,6 +106,8 @@
             <a class="btn" id="logoutBtn" href="/logout">
                 <span class="fa fa-sign-out">  Log Out</span>
             </a>
+            <div class="fb-like" data-href="https://bomb-tag.herokuapp.com/" data-width="50" data-layout="button_count"
+                 data-action="like" data-size="small" data-show-faces="true" data-share="true"></div>
           </div>
 
           <!-- error -->
