@@ -1,16 +1,5 @@
 body, html { height: 100%; }
 
-#main-container {
-   width: 100%;
-    max-width: none;
-}
-/*
-.content-row {
-   display: flex;
-   flex-wrap: wrap;
-}
-*/
-
 #usernameError {
    color: red;
 }
@@ -26,28 +15,21 @@ body, html { height: 100%; }
 
 .wrapper {
     display: flex;
-    width: 100%;
-    padding:0;
-    wrapper:0;
     align-items: stretch;
 }
 
 #sidebar {
-    /*
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    z-index: 100;
-    */
     width: 300px;
+    height: 100vh;
     padding-top: 20px;
     background-color: black;
     color: white;
+    align-self: stretch;
 }
 
 .page-body {
     width: 100%;
+    background-color: #bfd8bf;
 }
 
 #usersOnline {
@@ -70,8 +52,7 @@ body, html { height: 100%; }
 }
 
 #chat {
-   height: 70%;
-   width: 100%;
+   height: 60vh;
    margin:0;
    padding:2px;
    overflow-y: auto;
@@ -88,40 +69,12 @@ body, html { height: 100%; }
     cursor: pointer;
 }
 
-#playareaContainer {
-    overflow-x: scroll;
-    overflow-y: scroll;
-}
-
 #playarea {
-    border: 1px solid black;
+    display: block;
+    margin: 0 auto;
+    background-image: url('./pics/swirl_pattern.png');
 }
 
 #logoutBtn {
     color: inherit;
 }
-
-
-/*
-    facebook button
-*/
-.btn-facebook                               {color:#fff!important;background-color:#3b5998;border-color:rgba(0,0,0,0.2)}
-.btn-facebook:focus, .btn-facebook.focus    {color:#fff;background-color:#2d4373;border-color:rgba(0,0,0,0.2)}
-.btn-facebook:hover                         {color:#fff;background-color:#2d4373;border-color:rgba(0,0,0,0.2)}
-
-.btn-facebook:active,.btn-facebook.active,.open>.dropdown-toggle.btn-facebook
-{color:#fff;background-color:#2d4373;border-color:rgba(0,0,0,0.2)}
-
-.btn-facebook:active:hover,.btn-facebook.active:hover,.open>.dropdown-toggle.btn-facebook:hover,
-.btn-facebook:active:focus,.btn-facebook.active:focus,.open>.dropdown-toggle.btn-facebook:focus,
-.btn-facebook:active.focus,.btn-facebook.active.focus,.open>.dropdown-toggle.btn-facebook.focus
-{color:#fff;background-color:#23345a;border-color:rgba(0,0,0,0.2)}
-
-.btn-facebook:active,.btn-facebook.active,.open>.dropdown-toggle.btn-facebook {background-image:none}
-.btn-facebook.disabled:hover,.btn-facebook[disabled]:hover,fieldset[disabled] .btn-facebook:hover,
-.btn-facebook.disabled:focus,.btn-facebook[disabled]:focus,fieldset[disabled] .btn-facebook:focus,
-.btn-facebook.disabled.focus,.btn-facebook[disabled].focus,fieldset[disabled] .btn-facebook.focus
-{background-color:#3b5998;border-color:rgba(0,0,0,0.2)}
-
-.btn-facebook .badge
-{color:#3b5998;background-color:#fff}
