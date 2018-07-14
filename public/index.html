@@ -85,29 +85,24 @@
                     scope="public_profile, email"
                     onlogin="(function(){ location.href = '/fblogin/return'; })()">
             </fb:login-button>
-            <!--
-            <a class="btn btn-facebook" id="fbbtn">
-              <span class="fa fa-facebook"></span>
-            </a>
-            -->
-            <br />
-
-
-
-
-
-
           </div>
 
           <!-- user signed in group-->
           <div id="toLogOutGroup" style="display:none">
+
+            <!-- Username and Color -->
             <span id="uDisplay"></span>
             <input type="color" id="chooseColor" value="#000000" />
+
+            <!-- Facebook Like And Share -->
+            <div class="fb-like" data-href="https://bomb-tag.herokuapp.com/" data-width="50" data-layout="button_count"
+                 data-action="like" data-size="small" data-show-faces="true" data-share="true">
+            </div>
+
+            <!-- Sign Out -->
             <a class="btn" id="logoutBtn" href="/logout">
                 <span class="fa fa-sign-out">  Log Out</span>
             </a>
-            <div class="fb-like" data-href="https://bomb-tag.herokuapp.com/" data-width="50" data-layout="button_count"
-                 data-action="like" data-size="small" data-show-faces="true" data-share="true"></div>
           </div>
 
           <!-- error -->

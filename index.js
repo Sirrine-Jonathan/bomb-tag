@@ -5,7 +5,7 @@ let http = require('http').Server(app);
 let cookieParser = require('cookie-parser');
 let path = require('path');
 let logger = require('morgan');
-let bodyParse = require('body-parser');
+let bodyParser = require('body-parser');
 let session = require('express-session');
 let io = require('socket.io')(http);
 
@@ -43,6 +43,7 @@ passport.deserializeUser(function(obj, cb) {
 
 app.use(express.static('public', { index: false }));
 app.use(cookieParser());
+app.use(bodyParser.urlencoded({ extended: true}));
 app.use(logger('tiny'));
 app.use(session({
     secret: "bombtagsession",
@@ -78,7 +79,6 @@ app.get('/', (req, res) => {
 io.on('connection', (socket) => {
 
     // initialization
-    //io.emit('updateusers', users);
     app.get('/fblogin',
         passport.authenticate('facebook')
     );
@@ -110,8 +110,6 @@ io.on('connection', (socket) => {
 
       socket.userinfo = newUser;
       users[socket.userinfo.name] = socket.userinfo;
-
-      //io.sockets.emit('updateusers', users);
    });
 
    socket.on('sendchat', (msg) => {

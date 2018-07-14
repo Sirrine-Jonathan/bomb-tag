@@ -6,11 +6,6 @@ window.onload = function(){
   let socket = io();
 
     /*
-    let fbbtn = document.querySelector("#fbbtn");
-    fbbtn.addEventListener("click", () => {
-      location.href = "/fblogin";
-    });
-
 
       function statusChangeCallback(res){
           console.log("...status changed");
@@ -318,15 +313,41 @@ window.onload = function(){
     socket.on('state', (users) => {
         usersOnline = users;
 
+        let sortedUsers = sortObj(users, "time");
+
         // draw all users
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         let uo = document.querySelector('#usersOnline');
         uo.innerHTML = '';
-        for (let u in users){
-            draw(users[u]);
-            addUserToScoreBoard(users[u], uo);
+        for (let i = sortedUsers.length - 1; i >= 0; i--){
+            draw(sortedUsers[i]);
+            addUserToScoreBoard(sortedUsers[i], uo);
+        };
+    });
+
+    function sortObj(data, attr){
+        let resultArray = [];
+        for (u in data){
+            insert(data[u]);
         }
-    })
+        function insert(u){
+            if (resultArray.length <= 0){
+                resultArray.push(u);
+                return;
+            }
+            let inserted = false;
+            for (let i = 0; i < resultArray.length; i++){
+                if (u.time < resultArray[i].time && !inserted){
+                    resultArray.splice(i, 0, u);
+                    inserted = true;
+                }
+            }
+            if (!inserted){
+                resultArray.push(u);
+            }
+        }
+        return resultArray;
+    }
 
 };
 
