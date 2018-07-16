@@ -46,7 +46,6 @@ window.onload = function(){
           };
           socket.emit('movement', data);
       }, 1000 / 60);
-
   });
 
 
@@ -129,7 +128,13 @@ window.onload = function(){
     }
 
     function updateHeadAfterLogout(){
-        // revert head to logged out state
+        let head = document.querySelector('#header');
+        let toEnter = head.querySelector('#toLogInGroup');
+        let toLeave = head.querySelector('#toLogOutGroup');
+        let errorMsg = head.querySelector('#usernameError');
+        toEnter.style.display = 'block';
+        toLeave.style.display = 'none';
+        errorMsg.style.display = "none";
     }
 
     function validateColor(color){
@@ -203,15 +208,11 @@ window.onload = function(){
   /*
     client disconnected
   */
+  socket.on('logout', () => {
+     location.href = '/logout';
+  });
   socket.on('disconnected', () => {
-      // reapply inputs
-      uInput.style.display = "block";
-      errorMsg.style.display = "block";
-
-      //remove uDisplay
-      let head = document.getElementById('header');
-      let uDisplay = document.querySelector('#uDisplay');
-      head.removeChild(uDisplay);
+      updateHeadAfterLogout();
   });
 
     let btn = document.querySelector("#closeSidebar");
@@ -252,11 +253,11 @@ window.onload = function(){
 
 
     /*
-
         game mechanics
         -draw functions
         -socket state handling
      */
+
     let canvas = document.querySelector("#playarea");
     let ctx = canvas.getContext('2d');
 
@@ -267,6 +268,7 @@ window.onload = function(){
         ctx.fill();
         ctx.closePath();
     }
+
 
     socket.on('state', (users) => {
 
