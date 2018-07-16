@@ -72,7 +72,7 @@ body, html { height: 100%; }
 #playarea {
     display: block;
     margin: 0 auto;
-    background-image: url('./pics/swirl_pattern.png');
+    background-image: url('assets/swirl_pattern.png');
 }
 
 #logoutBtn {

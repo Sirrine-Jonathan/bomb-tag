@@ -53,6 +53,7 @@ app.use(session({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
+
 app.get('/', (req, res) => {
 
     const fileDirectory = path.resolve(__dirname, '.', 'public');

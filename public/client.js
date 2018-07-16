@@ -5,24 +5,11 @@ const itHTML = "<span style='color:red'>" + itSymbol + "</span>";
 window.onload = function(){  
   let socket = io();
 
-    /*
 
-      function statusChangeCallback(res){
-          console.log("...status changed");
-          console.log(res);
-      }
-
-      function checkLoginState(){
-          console.log("checking login status...");
-          FB.getLoginStatus(function (response) {
-              statusChangeCallback(response);
-          })
-      }
-
-    checkLoginState();
-    */
-
-
+  /*
+    User Enters Game
+    by pressing facebook login button
+  */
   socket.on('loggedOnViaFacebook', (data) => {
       console.log(data);
       let username = data.displayName;
@@ -190,35 +177,6 @@ window.onload = function(){
   });
 
 
-
-  /*
-    user has joined or left
-  */
-  /*
-  socket.on('updateusers', (users) => {
-      usersOnline = users;
-      let uo = document.querySelector('#usersOnline');
-      uo.innerHTML = '';
-      for (user in users){
-          let li = document.createElement('li');
-          li.style.borderRight = "50px solid " + users[user].color;
-          li.innerHTML = users[user].name + " " + (new Date(users[user].time).getTime());
-          if (users[user].it)
-              li.innerHTML += itHTML;
-          if (users[user].name == userName){
-              let it = users[user].it;
-              let uDisplay = document.querySelector("#uDisplay");
-              uDisplay.innerHTML = userName + ((it) ? itHTML:"");
-              let chooseColor = document.querySelector("#chooseColor");
-              chooseColor.value = users[user].color;
-              uDisplay.style.color = users[user].color;
-          }
-          uo.appendChild(li);
-      }
-  });
-  */
-
-
   function addUserToScoreBoard(user, board){
       let li = document.createElement('li');
       li.style.borderRight = "50px solid " + user.color;
@@ -311,14 +269,17 @@ window.onload = function(){
     }
 
     socket.on('state', (users) => {
-        usersOnline = users;
 
+        // get user array ready
+        usersOnline = users;
         let sortedUsers = sortObj(users, "time");
 
-        // draw all users
+        // begin drawing by clearing canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         let uo = document.querySelector('#usersOnline');
         uo.innerHTML = '';
+
+        // loops through users to draw them
         for (let i = sortedUsers.length - 1; i >= 0; i--){
             draw(sortedUsers[i]);
             addUserToScoreBoard(sortedUsers[i], uo);
