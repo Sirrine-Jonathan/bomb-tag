@@ -27,7 +27,8 @@ window.onload = function(){
             errorMsg.innerHTML = '';
         }
 
-        let user = new User(socket.id, username);
+        let canvas = document.querySelector("#playarea");
+        let user = new User(socket.id, username, canvas);
         user.photoURL = photoURL;
         socket.userinfo = user;
         updateHeadAfterLogin(user);

@@ -104,7 +104,7 @@ io.on('connection', (socket) => {
     });
     
    socket.on('new user', (user) => {
-      let newUser = new User(user.id, user.name, user.color);
+      let newUser = new User(user.id, user.name, user.canvas, user.color);
       socket.emit('updatechat', 'SERVER', SERVER_COLOR, 'you have connected');
       socket.broadcast.emit('updatechat', 'SERVER', SERVER_COLOR, newUser.name + ' has connected');
 
