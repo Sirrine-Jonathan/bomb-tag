@@ -11,7 +11,7 @@ window.onload = function(){
       by pressing facebook login button
     */
     //socket.on('loggedOnViaFacebook', startGameWithFbUser);
-    function startGameWithFbUser(data){
+    function startGameWithFbUser(data, id){
         console.log(data);
         let username = data.displayName;
         let photoURL = data.photos[0];
@@ -28,7 +28,8 @@ window.onload = function(){
         }
 
         let canvas = document.querySelector("#playarea");
-        let user = new User(socket.id, username, canvas);
+        console.log(id);
+        let user = new User(id, username, canvas);
         user.photoURL = photoURL;
         socket.userinfo = user;
         updateHeadAfterLogin(user);
@@ -49,7 +50,7 @@ window.onload = function(){
         }, 1000 / 60);
     };
     if (USER){
-        startGameWithFbUser(USER);
+        startGameWithFbUser(USER, socket.id);
     }
 
 
@@ -185,6 +186,11 @@ window.onload = function(){
     chat.appendChild(newChat);
   });
 
+  socket.on('tagged', () => {
+      let chooseColor = document.querySelector("#chooseColor");
+      chooseColor.value = "#ff0000";
+  });
+
 
   function addUserToScoreBoard(user, board){
       let li = document.createElement('li');
@@ -212,8 +218,12 @@ window.onload = function(){
   /*
     client disconnected
   */
+  socket.on('lose', () => {
+      console.log("you lost");
+     location.href = '/lose';
+  });
   socket.on('logout', () => {
-     location.href = '/logout';
+      location.href = '/logout';
   });
   socket.on('disconnected', () => {
       updateHeadAfterLogout();

@@ -4,7 +4,6 @@ const app = express();
 let http = require('http').Server(app);
 let io = require('socket.io')(http);
 let cookieParser = require('cookie-parser');
-let path = require('path');
 let logger = require('morgan');
 let bodyParser = require('body-parser');
 let session = require('express-session');
@@ -50,9 +49,8 @@ app.use(bodyParser.urlencoded({ extended: true}));
 app.use(logger('tiny'));
 app.use(session({
     secret: "bombtagsession",
-    saveUninitialized: false,
-    resave: false,
-    unset: 'destroy'
+    saveUninitialized: true,
+    resave: true,
 }));
 app.use(passport.initialize());
 app.use(passport.session());
@@ -91,7 +89,7 @@ io.on('connection', (socket) => {
     app.get('/fblogin/return',
         passport.authenticate('facebook', { failureRedirect: '/' }),
         function(req, res){
-            req.session.redirectFromFacebook = true;
+            //req.session.redirectFromFacebook = true;
             res.redirect('/');
     });
 
@@ -102,9 +100,13 @@ io.on('connection', (socket) => {
             res.redirect('/');
         });
     });
+
+    app.get('/lose', function(req, res){
+        res.render('lostgame.ejs', { user: socket.userinfo });
+    });
     
    socket.on('new user', (user) => {
-      let newUser = new User(user.id, user.name, user.canvas, user.color);
+      let newUser = new User(socket.id, user.name, user.canvas, user.color);
       socket.emit('updatechat', 'SERVER', SERVER_COLOR, 'you have connected');
       socket.broadcast.emit('updatechat', 'SERVER', SERVER_COLOR, newUser.name + ' has connected');
 
@@ -149,9 +151,7 @@ io.on('connection', (socket) => {
                  for(u in users)
                  {
                      let winnerName = users[u].name;
-                     let winnerSocket = io.sockets.connected[users[u].id];
-                     winnerSocket.emit('updatechat', 'SERVER', SERVER_COLOR, "You won!");
-                     winnerSocket.broadcast.emit('updatechat', 'SERVER', SERVER_COLOR, winnerName + " has won!");
+                     io.sockets.emit('updatechat', 'SERVER', SERVER_COLOR, winnerName + " has won!");
                  }
              }
          } else {
@@ -225,12 +225,10 @@ io.on('connection', (socket) => {
    function playerTagged(pTag){
        pTag.pos = { 'x': pTag.startPos.x, 'y': pTag.startPos.y };
        pTag.toggleTag();
-       //io.sockets.emit('updateusers', users);
        personIt = pTag.name;
        someoneIt = true;
-       let itSocket = io.sockets.connected[pTag.id];
-       itSocket.emit('updatechat', 'SERVER', SERVER_COLOR, 'you are it!');
-       itSocket.broadcast.emit('updatechat', 'SERVER', SERVER_COLOR, pTag.name + ' is it!');
+       io.to(pTag.id).emit('updatechat', 'SERVER', SERVER_COLOR, 'you are it!');
+       io.to(pTag.id).emit('tagged');
    }
 
    let lastUpdateTime = (new Date()).getTime();
@@ -238,16 +236,14 @@ io.on('connection', (socket) => {
        let currentTime = (new Date()).getTime();
        let timeDifference = currentTime - lastUpdateTime;
        lastUpdateTime = currentTime;
-       if (someoneIt && users[personIt].time > 1) {
+       if (someoneIt && users[personIt] && users[personIt].time > 1) {
            users[personIt].time -= (1 / 120);
            if (users[personIt].time <= 1){
-               let itSocket = io.sockets.connected[users[personIt].id];
+               console.log (users[personIt].name + " lost");
                users[personIt].color = "#000000";
                users[personIt].colorStore = "#000000";
-               //make someone else it
-               itSocket.emit('logout');
+               io.to(users[personIt].id).emit('lose', {});
            }
-
        }
        io.sockets.emit('state', users);
        if (someoneIt)
