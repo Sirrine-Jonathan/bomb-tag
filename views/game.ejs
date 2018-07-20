@@ -1,0 +1,137 @@
+<!doctype html>
+<html>
+<head>
+    <title>Bomb Tag</title>
+    <link rel="icon" href="assets/favicon.ico">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- You can use open graph tags to customize link previews.
+    Learn more: https://developers.facebook.com/docs/sharing/webmasters -->
+    <meta property="og:url"           content="https://bomb-tag.herokuapp.com/" />
+    <meta property="og:type"          content="website" />
+    <meta property="og:title"         content="Bomb Tag" />
+    <meta property="og:description"   content="Online multiplayer tag game" />
+    <!--<meta property="og:image"         content="" />-->
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script>
+        window.fbAsyncInit = function() {
+            FB.init({
+                appId      : <%= bomb.APP_ID %>,
+                cookie     : true,
+                xfbml      : true,
+                version    : 'v3.0'
+            });
+        };
+
+        (function(d, s, id){
+            var js, fjs = d.getElementsByTagName(s)[0];
+            if (d.getElementById(id)) {return;}
+            js = d.createElement(s); js.id = id;
+            js.src = "https://connect.facebook.net/en_US/sdk.js";
+            fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'facebook-jssdk'));
+    </script>
+
+    <!-- FACEBOOK LIKE BUTTON-->
+
+    <div id="fb-root"></div>
+    <script>(function(d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0];
+            if (d.getElementById(id)) return;
+            js = d.createElement(s); js.id = id;
+            js.src = 'https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v3.0&appId=2072017049705163&autoLogAppEvents=1';
+            fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'facebook-jssdk'));</script>
+    <!--
+    Bootstrap's JavaScript requires jQuery
+
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+          integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    -->
+
+    <link rel="stylesheet" type="text/css" href="css/gamestyle.css">
+</head>
+<body>
+<div class="main-container">
+    <div class="wrapper">
+
+        <!-- SIDEBAR -->
+        <div id="sidebar">
+            <ul id="usersOnline">
+            </ul>
+            <div id="chat">
+            </div>
+            <input id="chatInput" type="text" placeholder="say something"/>
+        </div>
+
+        <!-- BODY -->
+        <div class="page-body">
+
+            <div id="header">
+
+                <!-- top row -->
+                <span id="title">Bomb Tag  </span><span id="closeSidebar" class="btn btn-small">Toggle Sidebar</span><br />
+
+                <!-- sign in group -->
+                <div id="toLogInGroup">
+                    <input id="usernameInput" type="text" placeholder="Enter a username"/>
+                    <fb:login-button
+                            scope="public_profile, email"
+                            onlogin="(function(){ location.href = '/fblogin/return'; })()">
+                    </fb:login-button>
+                </div>
+
+                <!-- user signed in group-->
+                <div id="toLogOutGroup" style="display:none">
+
+                    <!-- Username and Color -->
+                    <span id="uDisplay"></span>
+                    <input type="color" id="chooseColor" value="#000000" />
+
+                    <!-- Facebook Like And Share -->
+                    <div class="fb-like" data-href="https://bomb-tag.herokuapp.com/" data-width="50" data-layout="button_count"
+                         data-action="like" data-size="small" data-show-faces="true" data-share="true">
+                    </div>
+
+                    <!-- Sign Out -->
+                    <a class="btn" id="logoutBtn" href="/logout">
+                        <span class="fa fa-sign-out">  Log Out</span>
+                    </a>
+                </div>
+
+                <!-- error -->
+                <span id="usernameError" class="error"></span>
+            </div>
+
+            <!-- play area -->
+            <canvas id="playarea" width="700" height="500">
+            </canvas>
+
+
+        </div><!-- end page-body   -->
+
+
+    </div><!-- end wrapper   -->
+</div><!--   end container -->
+<% if (bomb.user) { %>
+    <p> <%= bomb.user.displayName %></p>
+    <script>
+        const USER = <%- bomb.user %>;
+        console.log(USER);
+    </script>
+<% } else { %>
+    <p> not logged in </p>
+<% }%>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="//cdn.jsdelivr.net/npm/phaser-ce@2.11.0/build/phaser.min.js"></script>
+<script src="javascript/clientUser.js"></script>
+<script src="javascript/client.js"></script>
+<!--<script src="javascript/startGame.js"></script>-->
+<!--<script src="javascript/game.js"></script>-->
+</body>
+</html>

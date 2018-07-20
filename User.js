@@ -1,6 +1,6 @@
 class User {
 
-	constructor(id, username, canvas, color){
+	constructor(id, username, color){
 		this.id = id;
 		this.name = username;
 		this.color = color;
@@ -8,10 +8,6 @@ class User {
 		this.it = false;
 		this.speed = 2;
 		this.size = 10;
-		this.canvas = {
-			"width": canvas.width,
-			"height": canvas.height
-		};
 		this.time = User.startTime;
 		this.initPos();
 		User.cornerCount++;
@@ -19,7 +15,8 @@ class User {
 
     initPos() {
         let corner = User.cornerCount % 4;
-        let pos = {};
+        let pos = { 'x': 0, 'y': 0 };
+        /*
         switch(corner) {
 			case 0:
                 pos = {
@@ -53,6 +50,7 @@ class User {
                     'y': this.canvas.height / 2
                 };
         }
+        */
         this.startPos = { 'x': pos.x, 'y': pos.y };
         this.pos = { 'x': pos.x, 'y': pos.y };
     }

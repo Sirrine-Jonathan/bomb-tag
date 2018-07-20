@@ -1,13 +1,9 @@
 class User {
 
-    constructor(id, username, canvas){
+    constructor(id, username,){
         this.id = id;
         this.name = username;
         this.color = User.getRandomColor();
-        this.canvas = {
-            "width": canvas.width,
-            "height": canvas.height
-        };
     }
 
     static getRandomColor() {

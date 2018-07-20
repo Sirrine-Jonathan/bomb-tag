@@ -2,12 +2,13 @@
 const express = require('express');
 const app = express();
 let http = require('http').Server(app);
+let io = require('socket.io')(http);
 let cookieParser = require('cookie-parser');
 let path = require('path');
 let logger = require('morgan');
 let bodyParser = require('body-parser');
 let session = require('express-session');
-let io = require('socket.io')(http);
+
 
 // Game Globals
 const User = require('./User.js');
@@ -41,7 +42,9 @@ passport.deserializeUser(function(obj, cb) {
     cb(null, obj);
 });
 
-app.use(express.static('public', { index: false }));
+app.set('views', __dirname + '/views');
+app.set('view engine', 'ejs');
+app.use(express.static('public'));
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true}));
 app.use(logger('tiny'));
@@ -53,27 +56,29 @@ app.use(session({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
+
 app.get('/', (req, res) => {
 
-    const fileDirectory = path.resolve(__dirname, '.', 'public');
-    res.sendFile("index.html", { root: fileDirectory}, (err) => {
-        res.end();
-        if (err) throw(err);
-    });
-
+    /*
     if (req.session.redirectFromFacebook){
         redirectFromFacebook = true;
         io.on('connection', (socket) => {
             if (redirectFromFacebook) {
-                socket.emit('loggedOnViaFacebook', req.user);
                 req.session.redirectFromFacebook = false;
                 redirectFromFacebook = false;
+                socket.emit('loggedOnViaFacebook', req.user);
             }
         });
     }
-    else {
-        req.session.redirectFromFacebook = false;
-    }
+    */
+    let userObj = null;
+    if (req.user)
+        userObj = req.user;
+
+    res.render('game.ejs', { bomb: {
+        APP_ID: process.env.APP_ID,
+        user: JSON.stringify(userObj)
+    }});
 });
 
 io.on('connection', (socket) => {
@@ -83,7 +88,7 @@ io.on('connection', (socket) => {
         passport.authenticate('facebook')
     );
 
-    app.get('/fblogin/return*',
+    app.get('/fblogin/return',
         passport.authenticate('facebook', { failureRedirect: '/' }),
         function(req, res){
             req.session.redirectFromFacebook = true;
@@ -97,9 +102,9 @@ io.on('connection', (socket) => {
             res.redirect('/');
         });
     });
-
+    
    socket.on('new user', (user) => {
-      let newUser = new User(user.id, user.name, user.canvas, user.color);
+      let newUser = new User(user.id, user.name, user.color);
       socket.emit('updatechat', 'SERVER', SERVER_COLOR, 'you have connected');
       socket.broadcast.emit('updatechat', 'SERVER', SERVER_COLOR, newUser.name + ' has connected');
 
@@ -110,6 +115,10 @@ io.on('connection', (socket) => {
 
       socket.userinfo = newUser;
       users[socket.userinfo.name] = socket.userinfo;
+
+      console.log(users);
+      socket.emit('currentPlayers', users);
+      socket.broadcast.emit('newPlayer', users[socket.userinfo.name]);
    });
 
    socket.on('sendchat', (msg) => {
@@ -136,6 +145,14 @@ io.on('connection', (socket) => {
                      }
                      i++;
                  }
+             } else if (numOfUsers === 1){
+                 for(u in users)
+                 {
+                     let winnerName = users[u].name;
+                     let winnerSocket = io.sockets.connected[users[u].id];
+                     winnerSocket.emit('updatechat', 'SERVER', SERVER_COLOR, "You won!");
+                     winnerSocket.broadcast.emit('updatechat', 'SERVER', SERVER_COLOR, winnerName + " has won!");
+                 }
              }
          } else {
              delete users[socket.userinfo.name];
@@ -153,7 +170,6 @@ io.on('connection', (socket) => {
    socket.on('userchanged', (data) => {
        users[data.name].color = data.color;
        users[data.name].colorStore = data.color; // POSSIBLY NEEDS TO BE CHANGED / REMOVED
-       //io.sockets.emit('updateusers', users);
    });
 
 
@@ -229,7 +245,7 @@ io.on('connection', (socket) => {
                users[personIt].color = "#000000";
                users[personIt].colorStore = "#000000";
                //make someone else it
-               //itSocket.disconnect();
+               itSocket.emit('logout');
            }
 
        }

@@ -5,62 +5,51 @@ const itHTML = "<span style='color:red'>" + itSymbol + "</span>";
 window.onload = function(){  
   let socket = io();
 
+
     /*
-
-      function statusChangeCallback(res){
-          console.log("...status changed");
-          console.log(res);
-      }
-
-      function checkLoginState(){
-          console.log("checking login status...");
-          FB.getLoginStatus(function (response) {
-              statusChangeCallback(response);
-          })
-      }
-
-    checkLoginState();
+      User Enters Game
+      by pressing facebook login button
     */
+    //socket.on('loggedOnViaFacebook', startGameWithFbUser);
+    function startGameWithFbUser(data){
+        console.log(data);
+        let username = data.displayName;
+        let photoURL = data.photos[0];
 
+        // validate unique name constraint
+        let validUsername = validateUsername(username);
+        if (!validUsername) {
+            let errorMsg = document.querySelector('#usernameError');
+            errorMsg.innerHTML = "user already signed in";
+            return;
+        } else {
+            let errorMsg = document.querySelector('#usernameError');
+            errorMsg.innerHTML = '';
+        }
 
-  socket.on('loggedOnViaFacebook', (data) => {
-      console.log(data);
-      let username = data.displayName;
-      let photoURL = data.photos[0];
+        let user = new User(socket.id, username);
+        user.photoURL = photoURL;
+        socket.userinfo = user;
+        updateHeadAfterLogin(user);
 
-      // validate unique name constraint
-      let validUsername = validateUsername(username);
-      if (!validUsername) {
-          let errorMsg = document.querySelector('#usernameError');
-          errorMsg.innerHTML = "user already signed in";
-          return;
-      } else {
-          let errorMsg = document.querySelector('#usernameError');
-          errorMsg.innerHTML = '';
-      }
+        // update other users
+        socket.emit('new user', user);
 
-      let canvas = document.querySelector('#playarea');
-      let user = new User(socket.id, username, canvas);
-      user.photoURL = photoURL;
-      socket.userinfo = user;
-      updateHeadAfterLogin(user);
-
-      // update other users
-      socket.emit('new user', user);
-
-      // send player movement to server
-      setInterval(function() {
-          let data = {
-              'movement': movement,
-              'limits': {
-                  'right': canvas.width,
-                  'bottom': canvas.height
-              }
-          };
-          socket.emit('movement', data);
-      }, 1000 / 60);
-
-  });
+        // send player movement to server
+        setInterval(function() {
+            let data = {
+                'movement': movement,
+                'limits': {
+                    'right': canvas.width,
+                    'bottom': canvas.height
+                }
+            };
+            socket.emit('movement', data);
+        }, 1000 / 60);
+    };
+    if (USER){
+        startGameWithFbUser(USER);
+    }
 
 
   /*
@@ -142,7 +131,13 @@ window.onload = function(){
     }
 
     function updateHeadAfterLogout(){
-        // revert head to logged out state
+        let head = document.querySelector('#header');
+        let toEnter = head.querySelector('#toLogInGroup');
+        let toLeave = head.querySelector('#toLogOutGroup');
+        let errorMsg = head.querySelector('#usernameError');
+        toEnter.style.display = 'block';
+        toLeave.style.display = 'none';
+        errorMsg.style.display = "none";
     }
 
     function validateColor(color){
@@ -190,35 +185,6 @@ window.onload = function(){
   });
 
 
-
-  /*
-    user has joined or left
-  */
-  /*
-  socket.on('updateusers', (users) => {
-      usersOnline = users;
-      let uo = document.querySelector('#usersOnline');
-      uo.innerHTML = '';
-      for (user in users){
-          let li = document.createElement('li');
-          li.style.borderRight = "50px solid " + users[user].color;
-          li.innerHTML = users[user].name + " " + (new Date(users[user].time).getTime());
-          if (users[user].it)
-              li.innerHTML += itHTML;
-          if (users[user].name == userName){
-              let it = users[user].it;
-              let uDisplay = document.querySelector("#uDisplay");
-              uDisplay.innerHTML = userName + ((it) ? itHTML:"");
-              let chooseColor = document.querySelector("#chooseColor");
-              chooseColor.value = users[user].color;
-              uDisplay.style.color = users[user].color;
-          }
-          uo.appendChild(li);
-      }
-  });
-  */
-
-
   function addUserToScoreBoard(user, board){
       let li = document.createElement('li');
       li.style.borderRight = "50px solid " + user.color;
@@ -245,15 +211,11 @@ window.onload = function(){
   /*
     client disconnected
   */
+  socket.on('logout', () => {
+     location.href = '/logout';
+  });
   socket.on('disconnected', () => {
-      // reapply inputs
-      uInput.style.display = "block";
-      errorMsg.style.display = "block";
-
-      //remove uDisplay
-      let head = document.getElementById('header');
-      let uDisplay = document.querySelector('#uDisplay');
-      head.removeChild(uDisplay);
+      updateHeadAfterLogout();
   });
 
     let btn = document.querySelector("#closeSidebar");
@@ -294,11 +256,11 @@ window.onload = function(){
 
 
     /*
-
         game mechanics
         -draw functions
         -socket state handling
      */
+
     let canvas = document.querySelector("#playarea");
     let ctx = canvas.getContext('2d');
 
@@ -310,15 +272,19 @@ window.onload = function(){
         ctx.closePath();
     }
 
-    socket.on('state', (users) => {
-        usersOnline = users;
 
+    socket.on('state', (users) => {
+
+        // get user array ready
+        usersOnline = users;
         let sortedUsers = sortObj(users, "time");
 
-        // draw all users
+        // begin drawing by clearing canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         let uo = document.querySelector('#usersOnline');
         uo.innerHTML = '';
+
+        // loops through users to draw them
         for (let i = sortedUsers.length - 1; i >= 0; i--){
             draw(sortedUsers[i]);
             addUserToScoreBoard(sortedUsers[i], uo);
