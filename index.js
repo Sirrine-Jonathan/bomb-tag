@@ -42,7 +42,9 @@ passport.deserializeUser(function(obj, cb) {
     cb(null, obj);
 });
 
-app.use(express.static('public', { index: false }));
+app.set('views', __dirname + '/views');
+app.set('view engine', 'ejs');
+app.use(express.static('public'));
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true}));
 app.use(logger('tiny'));
@@ -57,25 +59,26 @@ app.use(passport.session());
 
 app.get('/', (req, res) => {
 
-    const fileDirectory = path.resolve(__dirname, '.', 'public');
-    res.sendFile("index.html", { root: fileDirectory}, (err) => {
-        res.end();
-        if (err) throw(err);
-    });
-
+    /*
     if (req.session.redirectFromFacebook){
         redirectFromFacebook = true;
         io.on('connection', (socket) => {
             if (redirectFromFacebook) {
-                socket.emit('loggedOnViaFacebook', req.user);
                 req.session.redirectFromFacebook = false;
                 redirectFromFacebook = false;
+                socket.emit('loggedOnViaFacebook', req.user);
             }
         });
     }
-    else {
-        req.session.redirectFromFacebook = false;
-    }
+    */
+    let userObj = null;
+    if (req.user)
+        userObj = req.user;
+
+    res.render('game.ejs', { bomb: {
+        APP_ID: process.env.APP_ID,
+        user: JSON.stringify(userObj)
+    }});
 });
 
 io.on('connection', (socket) => {
@@ -85,7 +88,7 @@ io.on('connection', (socket) => {
         passport.authenticate('facebook')
     );
 
-    app.get('/fblogin/return*',
+    app.get('/fblogin/return',
         passport.authenticate('facebook', { failureRedirect: '/' }),
         function(req, res){
             req.session.redirectFromFacebook = true;
@@ -99,9 +102,9 @@ io.on('connection', (socket) => {
             res.redirect('/');
         });
     });
-
+    
    socket.on('new user', (user) => {
-      let newUser = new User(user.id, user.name, user.canvas, user.color);
+      let newUser = new User(user.id, user.name, user.color);
       socket.emit('updatechat', 'SERVER', SERVER_COLOR, 'you have connected');
       socket.broadcast.emit('updatechat', 'SERVER', SERVER_COLOR, newUser.name + ' has connected');
 
@@ -113,8 +116,9 @@ io.on('connection', (socket) => {
       socket.userinfo = newUser;
       users[socket.userinfo.name] = socket.userinfo;
 
+      console.log(users);
       socket.emit('currentPlayers', users);
-      socket.emit('newPlayer', users[socket.userinfo.name]);
+      socket.broadcast.emit('newPlayer', users[socket.userinfo.name]);
    });
 
    socket.on('sendchat', (msg) => {

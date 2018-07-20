@@ -6,47 +6,50 @@ window.onload = function(){
   let socket = io();
 
 
-  /*
-    User Enters Game
-    by pressing facebook login button
-  */
-  socket.on('loggedOnViaFacebook', (data) => {
-      console.log(data);
-      let username = data.displayName;
-      let photoURL = data.photos[0];
+    /*
+      User Enters Game
+      by pressing facebook login button
+    */
+    //socket.on('loggedOnViaFacebook', startGameWithFbUser);
+    function startGameWithFbUser(data){
+        console.log(data);
+        let username = data.displayName;
+        let photoURL = data.photos[0];
 
-      // validate unique name constraint
-      let validUsername = validateUsername(username);
-      if (!validUsername) {
-          let errorMsg = document.querySelector('#usernameError');
-          errorMsg.innerHTML = "user already signed in";
-          return;
-      } else {
-          let errorMsg = document.querySelector('#usernameError');
-          errorMsg.innerHTML = '';
-      }
+        // validate unique name constraint
+        let validUsername = validateUsername(username);
+        if (!validUsername) {
+            let errorMsg = document.querySelector('#usernameError');
+            errorMsg.innerHTML = "user already signed in";
+            return;
+        } else {
+            let errorMsg = document.querySelector('#usernameError');
+            errorMsg.innerHTML = '';
+        }
 
-      let canvas = document.querySelector('#playarea');
-      let user = new User(socket.id, username, canvas);
-      user.photoURL = photoURL;
-      socket.userinfo = user;
-      updateHeadAfterLogin(user);
+        let user = new User(socket.id, username);
+        user.photoURL = photoURL;
+        socket.userinfo = user;
+        updateHeadAfterLogin(user);
 
-      // update other users
-      socket.emit('new user', user);
+        // update other users
+        socket.emit('new user', user);
 
-      // send player movement to server
-      setInterval(function() {
-          let data = {
-              'movement': movement,
-              'limits': {
-                  'right': canvas.width,
-                  'bottom': canvas.height
-              }
-          };
-          socket.emit('movement', data);
-      }, 1000 / 60);
-  });
+        // send player movement to server
+        setInterval(function() {
+            let data = {
+                'movement': movement,
+                'limits': {
+                    'right': canvas.width,
+                    'bottom': canvas.height
+                }
+            };
+            socket.emit('movement', data);
+        }, 1000 / 60);
+    };
+    if (USER){
+        startGameWithFbUser(USER);
+    }
 
 
   /*
